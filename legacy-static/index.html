@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RCA Research Biennale 2027 Generative Backdrops</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  </head>
+  <body>
+    <div class="controls" aria-label="Seed recall controls">
+      <span id="view-state" class="controls__state">Main View</span>
+      <label class="controls__label" for="element-select">Element</label>
+      <select id="element-select" class="controls__select" aria-label="Visual language element">
+        <option value="line">Line</option>
+        <option value="space">Space</option>
+        <option value="shape">Shape</option>
+        <option value="form">Form</option>
+        <option value="colour">Colour</option>
+        <option value="texture">Texture</option>
+        <option value="value">Value</option>
+        <option value="typography">Typography</option>
+      </select>
+      <label class="controls__label" for="principle-select">Principle</label>
+      <select id="principle-select" class="controls__select" aria-label="Visual language principle">
+        <option value="unityHarmony">Unity/Harmony</option>
+        <option value="variety">Variety</option>
+        <option value="balance">Balance</option>
+        <option value="gradations">Gradations</option>
+        <option value="emphasis">Emphasis</option>
+        <option value="rhythm">Rhythm</option>
+        <option value="movement">Movement</option>
+        <option value="pattern">Pattern</option>
+        <option value="proportion">Proportion</option>
+      </select>
+      <label class="controls__label" for="chaos-range">Chaos</label>
+      <input id="chaos-range" class="controls__range" type="range" min="0" max="100" step="1" value="30" aria-label="Chaos level" />
+      <span id="chaos-value" class="controls__value">30</span>
+      <label class="controls__label" for="proof-select">Proof</label>
+      <select id="proof-select" class="controls__select" aria-label="Proof background mode">
+        <option value="white">White</option>
+        <option value="black">Black</option>
+      </select>
+      <button id="toggle-type-proof" class="controls__button" type="button">Type Proof</button>
+      <label class="controls__label" for="type-layout-select">Type Layout</label>
+      <select id="type-layout-select" class="controls__select" aria-label="Type proof layout">
+        <option value="left">Left</option>
+        <option value="centre">Centre</option>
+      </select>
+      <label class="controls__label" for="seed-input">Seed</label>
+      <input id="seed-input" class="controls__input" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="Paste seed" />
+      <button id="load-seed" class="controls__button" type="button">Load Seed</button>
+      <button id="generate-batch" class="controls__button" type="button">Generate Batch</button>
+      <button id="export-png" class="controls__button" type="button">Export PNG</button>
+    </div>
+    <aside id="sandbox-panel" class="sandbox-panel sandbox-panel--hidden" aria-label="Code Sandbox">
+      <div class="sandbox-panel__header">
+        <h2 class="sandbox-panel__title">Code Sandbox</h2>
+        <button id="close-sandbox" class="sandbox-panel__close" type="button" aria-label="Close Code Sandbox">Close</button>
+      </div>
+      <p class="sandbox-panel__note">Experimental snippets can break the current render until refreshed. Use Reset Sandbox to return to the approved system.</p>
+      <p id="sandbox-status" class="sandbox-panel__status sandbox-panel__status--hidden" role="status" aria-live="polite"></p>
+      <textarea id="sandbox-snippet" class="sandbox-panel__textarea" spellcheck="false" placeholder="// Example only. Snippets run only when you click Apply Snippet.&#10;// sandboxConfig.lineMultiplier = 1.25;&#10;// sandboxConfig.noiseScaleMultiplier = 0.9;"></textarea>
+      <div class="sandbox-panel__actions">
+        <button id="apply-snippet" class="controls__button" type="button">Apply Snippet</button>
+        <button id="clear-snippet" class="controls__button" type="button">Clear</button>
+        <button id="reset-sandbox" class="controls__button" type="button">Reset Sandbox</button>
+      </div>
+    </aside>
+    <script src="sketch.js"></script>
+  </body>
+</html>
