@@ -5,27 +5,85 @@ import BatchReview from "./components/BatchReview";
 import CanvasStage from "./components/CanvasStage";
 import ControlPanel from "./components/ControlPanel";
 import ExportPanel from "./components/ExportPanel";
+import SandboxPanel from "./components/SandboxPanel";
 import StatusBar from "./components/StatusBar";
-import { DEFAULT_MACHINE_STATE, ELEMENT_OPTIONS, PRINCIPLE_OPTIONS, PROCESS_OPTIONS, PRODUCT_NAME } from "./engine/constants";
+import { DEFAULT_MACHINE_STATE, GESTALT_CONTROL_SECTIONS, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGestaltControls, getActiveGestaltItems } from "./engine/constants";
 import { buildExportFilename } from "./engine/exportNaming";
 import { applyExportMetricsToState, getExportMetrics } from "./engine/exportSizing";
-import { createGestaltEngine } from "./engine/gestaltEngine";
+import { createGestaltEngine, normalizeMachineState } from "./engine/gestaltEngine";
 
 function isEditableTarget(target) {
   const tagName = target?.tagName;
   return tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || target?.isContentEditable;
 }
 
+function hydrateMachineState(state) {
+  return applyExportMetricsToState(normalizeMachineState(state));
+}
+
+function buildSandboxStateSnapshot(state) {
+  return {
+    element: state.element,
+    principle: state.principle,
+    chaos: state.chaos,
+    proof: state.proof,
+    process: state.process,
+    processIntensity: state.processIntensity,
+    processScale: state.processScale,
+    seed: state.seed,
+    typeProof: state.typeProof,
+    typeLayout: state.typeLayout,
+    gestaltControls: state.gestaltControls,
+  };
+}
+
+function serializeSandboxState(state) {
+  return JSON.stringify(buildSandboxStateSnapshot(state), null, 2);
+}
+
+function buildActiveSummary(state) {
+  const activeElements = getActiveGestaltItems(state.gestaltControls, "elements");
+  const activePrinciples = getActiveGestaltItems(state.gestaltControls, "principles");
+
+  if (activeElements.length === 0) {
+    return "Blank canvas";
+  }
+
+  const formatItems = (items, singularLabel, pluralLabel) => {
+    if (items.length === 1) {
+      return items[0].title;
+    }
+
+    if (items.length === 2) {
+      return `${items[0].title} + ${items[1].title}`;
+    }
+
+    return `${items.length} ${pluralLabel}`;
+  };
+
+  const elementLabel = formatItems(activeElements, "Element", "Elements");
+
+  if (activePrinciples.length === 0) {
+    return activeElements.length === 1 ? `${elementLabel} active` : `${elementLabel} active`;
+  }
+
+  const principleLabel = formatItems(activePrinciples, "Principle", "Principles");
+  return `${elementLabel} × ${principleLabel} active`;
+}
+
 export default function App() {
   const stageRef = useRef(null);
   const engineRef = useRef(null);
   const [engineReady, setEngineReady] = useState(false);
-  const [engineState, setEngineState] = useState(applyExportMetricsToState(DEFAULT_MACHINE_STATE));
+  const [engineState, setEngineState] = useState(() => hydrateMachineState(DEFAULT_MACHINE_STATE));
   const [seedInput, setSeedInput] = useState(String(DEFAULT_MACHINE_STATE.seed));
   const [batchCandidates, setBatchCandidates] = useState([]);
   const [batchLoading, setBatchLoading] = useState(false);
   const [error, setError] = useState("");
   const [theme, setTheme] = useState("g100");
+  const [sandboxCode, setSandboxCode] = useState(() => serializeSandboxState(hydrateMachineState(DEFAULT_MACHINE_STATE)));
+  const [sandboxDirty, setSandboxDirty] = useState(false);
+  const [sandboxStatus, setSandboxStatus] = useState(null);
 
   useEffect(() => {
     document.title = PRODUCT_NAME;
@@ -43,7 +101,7 @@ export default function App() {
     controller.ready
       .then((initialState) => {
         setEngineReady(true);
-        setEngineState(applyExportMetricsToState(initialState));
+        setEngineState(hydrateMachineState(initialState));
         setSeedInput(String(initialState.seed));
       })
       .catch((nextError) => {
@@ -66,6 +124,12 @@ export default function App() {
   useEffect(() => {
     setSeedInput(String(engineState.seed));
   }, [engineState.seed]);
+
+  useEffect(() => {
+    if (!sandboxDirty) {
+      setSandboxCode(serializeSandboxState(engineState));
+    }
+  }, [engineState, sandboxDirty]);
 
   useEffect(() => {
     const handleKeyDown = async (event) => {
@@ -123,15 +187,17 @@ export default function App() {
     };
   }, [engineReady, engineState]);
 
-  async function applyState(patch, options) {
+  async function applyState(patchOrUpdater) {
     setError("");
 
     try {
-      setEngineState((currentState) => applyExportMetricsToState({
-        ...currentState,
-        ...patch,
-        activated: options?.activateMatrix ? true : currentState.activated,
-      }));
+      setEngineState((currentState) => {
+        const nextState = typeof patchOrUpdater === "function"
+          ? patchOrUpdater(currentState)
+          : { ...currentState, ...patchOrUpdater };
+
+        return hydrateMachineState(nextState);
+      });
     } catch (nextError) {
       setError(nextError.message);
     }
@@ -139,17 +205,17 @@ export default function App() {
 
   async function handleElementChange(value) {
     setBatchCandidates([]);
-    await applyState({ element: value }, { activateMatrix: true });
+    await applyState({ element: value });
   }
 
   async function handlePrincipleChange(value) {
     setBatchCandidates([]);
-    await applyState({ principle: value }, { activateMatrix: true });
+    await applyState({ principle: value });
   }
 
   async function handleChaosChange(value) {
     setBatchCandidates([]);
-    await applyState({ chaos: value }, { activateMatrix: true });
+    await applyState({ chaos: value });
   }
 
   async function handleProofChange(value) {
@@ -169,6 +235,24 @@ export default function App() {
   async function handleProcessScaleChange(value) {
     setBatchCandidates([]);
     await applyState({ processScale: value });
+  }
+
+  async function handleGestaltControlChange(section, key, patch) {
+    setBatchCandidates([]);
+    await applyState((currentState) => ({
+      ...currentState,
+      [section === "elements" ? "element" : "principle"]: key,
+      gestaltControls: {
+        ...currentState.gestaltControls,
+        [section]: {
+          ...currentState.gestaltControls[section],
+          [key]: {
+            ...currentState.gestaltControls[section][key],
+            ...patch,
+          },
+        },
+      },
+    }));
   }
 
   async function handleTypeProofChange(value) {
@@ -279,12 +363,79 @@ export default function App() {
     await applyState({ customHeight: Number.isFinite(nextHeight) && nextHeight > 0 ? nextHeight : engineState.customHeight });
   }
 
+  function handleSandboxCodeChange(value) {
+    setSandboxDirty(true);
+    setSandboxStatus(null);
+    setSandboxCode(value);
+  }
+
+  async function handleSandboxApply() {
+    setError("");
+
+    try {
+      const parsedConfig = JSON.parse(sandboxCode);
+
+      if (!parsedConfig || typeof parsedConfig !== "object" || Array.isArray(parsedConfig)) {
+        throw new Error("Sandbox input must be a JSON object.");
+      }
+
+      const nextState = hydrateMachineState({
+        ...engineState,
+        ...parsedConfig,
+        gestaltControls: parsedConfig.gestaltControls ?? engineState.gestaltControls,
+      });
+
+      setBatchCandidates([]);
+      setEngineState(nextState);
+      setSandboxCode(serializeSandboxState(nextState));
+      setSandboxDirty(false);
+      setSandboxStatus({
+        kind: "success",
+        title: "Code applied",
+        subtitle: "The composition state was updated from the sandbox JSON.",
+      });
+    } catch (nextError) {
+      setSandboxStatus({
+        kind: "error",
+        title: "Code error",
+        subtitle: nextError.message,
+      });
+    }
+  }
+
+  function handleSandboxReset() {
+    setSandboxCode(serializeSandboxState(engineState));
+    setSandboxDirty(false);
+    setSandboxStatus({
+      kind: "info",
+      title: "Sandbox reset",
+      subtitle: "The editor was restored from the current React machine state.",
+    });
+  }
+
+  async function handleClearCanvas() {
+    setBatchCandidates([]);
+    setSandboxStatus({
+      kind: "info",
+      title: "Canvas cleared",
+      subtitle: "All elements and principles were deactivated and their sliders were reset.",
+    });
+    setSandboxDirty(false);
+
+    await applyState((currentState) => ({
+      ...currentState,
+      element: DEFAULT_MACHINE_STATE.element,
+      principle: DEFAULT_MACHINE_STATE.principle,
+      gestaltControls: createDefaultGestaltControls(),
+    }));
+  }
+
   const filenamePreview = useMemo(() => buildExportFilename(engineState, { includeExtension: true }), [engineState]);
   const exportMetrics = useMemo(() => getExportMetrics(engineState), [engineState]);
-  const elementLabel = ELEMENT_OPTIONS.find((option) => option.value === engineState.element)?.label ?? engineState.element;
-  const principleLabel = PRINCIPLE_OPTIONS.find((option) => option.value === engineState.principle)?.label ?? engineState.principle;
   const processLabel = PROCESS_OPTIONS.find((option) => option.value === engineState.process)?.label ?? engineState.process;
-  const matrixSummary = `${elementLabel} × ${principleLabel} × Chaos ${engineState.chaos}`;
+  const activeElements = getActiveGestaltItems(engineState.gestaltControls, "elements");
+  const activePrinciples = getActiveGestaltItems(engineState.gestaltControls, "principles");
+  const matrixSummary = buildActiveSummary(engineState);
 
   return (
     <Theme theme={theme} className={`app-shell app-shell--${theme}`}>
@@ -295,29 +446,41 @@ export default function App() {
             <ControlPanel
               state={engineState}
               seedInput={seedInput}
-              onElementChange={handleElementChange}
-              onPrincipleChange={handlePrincipleChange}
+              summaryLabel={matrixSummary}
               onChaosChange={handleChaosChange}
               onProofChange={handleProofChange}
               onProcessChange={handleProcessChange}
               onProcessIntensityChange={handleProcessIntensityChange}
               onProcessScaleChange={handleProcessScaleChange}
+              onElementChange={handleElementChange}
+              onPrincipleChange={handlePrincipleChange}
+              onElementControlChange={(key, patch) => handleGestaltControlChange("elements", key, patch)}
+              onPrincipleControlChange={(key, patch) => handleGestaltControlChange("principles", key, patch)}
               onTypeProofChange={handleTypeProofChange}
               onTypeLayoutChange={handleTypeLayoutChange}
               onSeedInputChange={setSeedInput}
               onLoadSeed={handleLoadSeed}
               onGenerateBatch={handleGenerateBatch}
               onRegenerateSeed={handleRegenerateSeed}
+              onClearCanvas={handleClearCanvas}
               disabled={!engineReady}
             />
           </div>
 
           <div className="app-shell__centre">
             <CanvasStage stageRef={stageRef} ready={engineReady} viewLabel={engineState.activated ? "Composition view" : "Blank view"} activated={engineState.activated} />
-            <StatusBar state={{ ...engineState, element: elementLabel, principle: principleLabel, process: processLabel, exportWidth: exportMetrics.finalWidth, exportHeight: exportMetrics.finalHeight, matrixSummary }} error={error} />
+            <StatusBar state={{ ...engineState, process: processLabel, exportWidth: exportMetrics.finalWidth, exportHeight: exportMetrics.finalHeight, matrixSummary, activeElementCount: activeElements.length, activePrincipleCount: activePrinciples.length }} error={error} />
           </div>
 
           <div className="app-shell__right">
+            <SandboxPanel
+              code={sandboxCode}
+              status={sandboxStatus}
+              onCodeChange={handleSandboxCodeChange}
+              onApply={handleSandboxApply}
+              onReset={handleSandboxReset}
+              disabled={!engineReady}
+            />
             <ExportPanel
               filename={filenamePreview}
               state={engineState}
@@ -331,7 +494,7 @@ export default function App() {
               onExport={() => engineRef.current?.exportPng(engineState)}
               disabled={!engineReady}
             />
-            <BatchReview candidates={batchCandidates} state={{ ...engineState, element: elementLabel, principle: principleLabel, process: processLabel, matrixSummary }} onCandidateSelect={handleCandidateSelect} loading={batchLoading} />
+            <BatchReview candidates={batchCandidates} state={{ ...engineState, process: processLabel, matrixSummary }} onCandidateSelect={handleCandidateSelect} loading={batchLoading} />
           </div>
         </section>
       </main>

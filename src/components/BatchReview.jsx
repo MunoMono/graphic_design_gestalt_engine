@@ -20,7 +20,8 @@ export default function BatchReview({ candidates, state, onCandidateSelect, load
             <img src={candidate.imageUrl} alt={`Seed ${candidate.seed}`} className="candidate-card__image" />
             <div className="candidate-card__meta">
               <strong>Seed {candidate.seed}</strong>
-              <span>{candidate.elementLabel} x {candidate.principleLabel} x {candidate.processLabel}{candidate.processLabel !== "Clean" ? ` x I${candidate.processIntensity} x S${candidate.processScale}` : ""}</span>
+              <span>{candidate.compositionSummary ?? `${candidate.elementLabel} x ${candidate.principleLabel}`}</span>
+              <span>{candidate.processLabel}{candidate.processLabel !== "Clean" ? ` x I${candidate.processIntensity} x S${candidate.processScale}` : ""}</span>
             </div>
           </button>
         ))}

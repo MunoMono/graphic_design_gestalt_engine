@@ -1,1 +1,1 @@
-export { createGestaltEngine } from "./gestaltRuntime";
+export { createGestaltEngine, normalizeMachineState } from "./gestaltRuntime";
