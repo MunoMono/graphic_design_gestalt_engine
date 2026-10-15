@@ -592,14 +592,48 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .cds--form-item,
-  .cds--slider-container {
+  .cds--form-item {
+    width: 100%;
     min-width: 0;
-    max-width: 100%;
+  }
+
+  // Full-width track on its own row; range labels and value input beneath.
+  .cds--slider-container {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 0.75rem;
+    row-gap: 0.25rem;
+    width: 100%;
+    min-width: 0;
   }
 
   .cds--slider {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
     min-width: 0;
-    flex: 1 1 auto;
+    max-width: none;
+    margin: 0;
+  }
+
+  .cds--slider__range-label {
+    grid-row: 2;
+    margin: 0;
+  }
+
+  .cds--slider__range-label:first-of-type {
+    grid-column: 1;
+  }
+
+  .cds--slider__range-label:last-of-type {
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  .cds--slider-text-input-wrapper {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: center;
   }
 }
