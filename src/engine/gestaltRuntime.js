@@ -3,6 +3,8 @@ import { DEFAULT_GESTALT_CONTROLS, DEFAULT_MACHINE_STATE, EXPORT_FORMAT_OPTIONS,
 import { buildExportFilename } from "./exportNaming";
 import { getExportMetrics } from "./exportSizing";
 import { buildDeterministicBatchSeeds, hashStringToSeed } from "./seededRandom";
+import { getBackgroundProof, normalizeBackground } from "./background";
+import { buildColourPalette, normalizeColourState } from "./colourPresets";
 
 const VIEW_MODES = {
   main: "main",
@@ -51,7 +53,6 @@ const GESTALT_ELEMENTS = {
   space: { key: "space", label: "Space", slug: "space" },
   shape: { key: "shape", label: "Shape", slug: "shape" },
   form: { key: "form", label: "Form", slug: "form" },
-  colour: { key: "colour", label: "Colour", slug: "colour" },
   texture: { key: "texture", label: "Texture", slug: "texture" },
   value: { key: "value", label: "Value", slug: "value" },
   typography: { key: "typography", label: "Typography", slug: "typography" },
@@ -153,12 +154,15 @@ function normalizeState(state = {}) {
   const exportMetrics = getExportMetrics(mergedState);
   const gestaltControls = normalizeGestaltControls(mergedState.gestaltControls);
   const hasActiveElements = getActiveGestaltItems(gestaltControls, "elements").length > 0;
+  const background = normalizeBackground(state);
 
   return {
     element: GESTALT_ELEMENTS[mergedState.element] ? mergedState.element : DEFAULT_MACHINE_STATE.element,
     principle: GESTALT_PRINCIPLES[mergedState.principle] ? mergedState.principle : DEFAULT_MACHINE_STATE.principle,
     chaos: Math.min(100, Math.max(0, Math.round(Number(mergedState.chaos) || 0))),
-    proof: PROOF_MODES[mergedState.proof] ? mergedState.proof : DEFAULT_MACHINE_STATE.proof,
+    ...background,
+    proof: getBackgroundProof(background.backgroundColor),
+    ...normalizeColourState(mergedState),
     process: PROCESS_MODES[mergedState.process] ? mergedState.process : DEFAULT_MACHINE_STATE.process,
     processIntensity: Math.min(100, Math.max(0, Math.round(Number(mergedState.processIntensity) || 0))),
     processScale: Math.min(100, Math.max(0, Math.round(Number(mergedState.processScale) || 0))),
@@ -214,10 +218,6 @@ function getActivePrincipleDefinitions(state) {
 
 function shouldRenderElement(state, elementKey) {
   return Boolean(state.gestaltControls?.elements?.[elementKey]?.active);
-}
-
-function shouldRenderAtmosphere(state) {
-  return shouldRenderElement(state, GESTALT_ELEMENTS.colour.key);
 }
 
 function getCurrentGestaltControls(state, elementKey = state.element) {
@@ -315,11 +315,11 @@ function getGestaltModifiers(state, elementKey) {
 
 function applyProofModeToPalette(state) {
   const proofMode = getCurrentProofMode(state);
-  return {
+  return buildColourPalette(state, {
     background: proofMode.background,
     lines: [...proofMode.lines],
     accent: proofMode.accent,
-  };
+  });
 }
 
 function initializeRenderPreset(state) {
@@ -371,7 +371,8 @@ function drawTypeProof(p, target, renderState, renderPalette, renderWidth, rende
 }
 
 function renderBaseCompositionToTarget(p, target, renderState, renderWidth, renderHeight, renderPalette, artPreset) {
-  target.background(renderPalette.background);
+  target.clear();
+  if (!renderState.transparentArtwork) target.background(renderPalette.background);
 
   if (renderState.activated) {
     renderGestaltMachine(p, target, renderPalette, renderWidth, renderHeight, renderState, artPreset);
@@ -397,7 +398,7 @@ function drawSourceImageWithAlpha(target, source, alpha, width, height) {
   target.pop();
 }
 
-function buildPixelSampler(graphics) {
+function buildPixelSampler(graphics, renderState) {
   graphics.loadPixels();
   const density = typeof graphics.pixelDensity === "function" ? graphics.pixelDensity() : 1;
   const rowWidth = graphics.width * density;
@@ -413,7 +414,8 @@ function buildPixelSampler(graphics) {
     const g = pixels[index + 1] ?? 0;
     const b = pixels[index + 2] ?? 0;
     const a = pixels[index + 3] ?? 255;
-    const luminance = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+    const ground = renderState.proof === "white" ? 1 : 0;
+    const luminance = ((r * 0.299 + g * 0.587 + b * 0.114) / 255) * (a / 255) + ground * (1 - a / 255);
     return { r, g, b, a, luminance };
   };
 }
@@ -434,7 +436,7 @@ function applyHalftoneProcess(p, target, source, renderState, renderPalette, ren
   const processScale = getProcessScale(renderState);
   const minDimension = p.min(renderWidth, renderHeight);
   const spacing = p.max(4, Math.round(minDimension * p.lerp(0.0035, 0.016, processScale) * (1 - chaos * 0.08)));
-  const sampler = buildPixelSampler(source);
+  const sampler = buildPixelSampler(source, renderState);
 
   drawSourceImageWithAlpha(target, source, 0.2 + intensity * 0.34, renderWidth, renderHeight);
   target.push();
@@ -466,7 +468,7 @@ function applyDiffusionDitherProcess(p, target, source, renderState, renderPalet
   const cellSize = p.max(3, Math.round(minDimension * p.lerp(0.0028, 0.013, processScale) * (1 + chaos * 0.06)));
   const columns = Math.ceil(renderWidth / cellSize);
   const rows = Math.ceil(renderHeight / cellSize);
-  const sampler = buildPixelSampler(source);
+  const sampler = buildPixelSampler(source, renderState);
   const errorField = Array.from({ length: rows }, () => new Array(columns).fill(0));
 
   drawSourceImageWithAlpha(target, source, 0.14 + intensity * 0.22, renderWidth, renderHeight);
@@ -514,7 +516,7 @@ function applyCoarseBitmapProcess(p, target, source, renderState, renderPalette,
   const processScale = getProcessScale(renderState);
   const minDimension = p.min(renderWidth, renderHeight);
   const cellSize = p.max(6, Math.round(minDimension * p.lerp(0.006, 0.028, processScale) * (1 + chaos * 0.08)));
-  const sampler = buildPixelSampler(source);
+  const sampler = buildPixelSampler(source, renderState);
 
   drawSourceImageWithAlpha(target, source, 0.14 + intensity * 0.18, renderWidth, renderHeight);
   target.push();
@@ -583,6 +585,7 @@ function applyPhototypeSliceProcess(p, target, source, renderState, renderPalett
   const knockoutColor = p.color(renderPalette.background);
   knockoutColor.setAlpha(35 + intensity * 45);
   target.fill(knockoutColor);
+  if (renderState.transparentArtwork) target.drawingContext.globalCompositeOperation = "destination-out";
   for (let index = 0; index < Math.round(2 + intensity * 6); index += 1) {
     if (horizontal) {
       const bandY = p.random(renderHeight);
@@ -668,6 +671,7 @@ function applyTornMaskProcess(p, target, source, renderState, renderPalette, ren
     target.push();
     target.noStroke();
     target.fill(knockoutColor);
+    if (renderState.transparentArtwork) target.drawingContext.globalCompositeOperation = "destination-out";
     target.beginShape();
     for (let point = 0; point < points; point += 1) {
       const angle = (p.TWO_PI / points) * point + p.random(-0.42, 0.42);
@@ -703,9 +707,10 @@ function applyChromaticOffsetProcess(p, target, source, renderState, renderPalet
 
   const offsetAmount = p.max(1.5, p.min(renderWidth, renderHeight) * (0.0015 + processScale * 0.0065));
   const alpha = 28 + intensity * 90;
-  const paletteA = renderState.proof === PROOF_MODES.white.key ? "#d43f30" : "#ff7a6c";
-  const paletteB = renderState.proof === PROOF_MODES.white.key ? "#0096a6" : "#7de6ff";
-  const paletteC = renderState.proof === PROOF_MODES.white.key ? renderPalette.lines[1] : "#f6ecda";
+  const chroma = renderPalette.chroma;
+  const paletteA = chroma ? renderPalette.accent : renderState.proof === PROOF_MODES.white.key ? "#d43f30" : "#ff7a6c";
+  const paletteB = chroma ? chroma.find((tone) => tone !== paletteA) ?? chroma[0] : renderState.proof === PROOF_MODES.white.key ? "#0096a6" : "#7de6ff";
+  const paletteC = chroma ? chroma.find((tone) => tone !== paletteA && tone !== paletteB) ?? renderPalette.lines[1] : renderState.proof === PROOF_MODES.white.key ? renderPalette.lines[1] : "#f6ecda";
 
   drawTintedOffsetImage(p, target, source, renderWidth, renderHeight, paletteA, alpha, -offsetAmount, offsetAmount * 0.35, "source-over");
   drawTintedOffsetImage(p, target, source, renderWidth, renderHeight, paletteB, alpha * 0.92, offsetAmount, -offsetAmount * 0.25, "source-over");
@@ -715,7 +720,7 @@ function applyChromaticOffsetProcess(p, target, source, renderState, renderPalet
 function applyStepQuantizeProcess(p, target, source, renderState, renderPalette, renderWidth, renderHeight) {
   const intensity = getProcessIntensity(renderState);
   const processScale = getProcessScale(renderState);
-  const sampler = buildPixelSampler(source);
+  const sampler = buildPixelSampler(source, renderState);
   const minDimension = p.min(renderWidth, renderHeight);
   const cellSize = p.max(4, Math.round(minDimension * p.lerp(0.0035, 0.02, processScale)));
   const levels = Math.max(2, Math.round(p.lerp(7, 3, intensity)));
@@ -777,20 +782,55 @@ function applyProcessToTarget(p, target, source, renderState, renderPalette, ren
 }
 
 function renderCompositionToTarget(p, target, renderState, renderWidth, renderHeight) {
+  const { backgroundColor, backgroundOpacity } = normalizeBackground(renderState);
+  const legacyGround = PROOF_MODES[renderState.proof].background;
+  if (backgroundColor === legacyGround && backgroundOpacity === 100) {
+    renderArtworkToTarget(p, target, renderState, renderWidth, renderHeight);
+    return;
+  }
+
+  const artwork = p.createGraphics(renderWidth, renderHeight);
+  artwork.pixelDensity(1);
+  artwork.noSmooth();
+  try {
+    renderArtworkToTarget(p, artwork, { ...renderState, transparentArtwork: true }, renderWidth, renderHeight);
+    target.clear();
+    const background = p.color(backgroundColor);
+    background.setAlpha(backgroundOpacity * 255 / 100);
+    target.background(background);
+    target.image(artwork, 0, 0, renderWidth, renderHeight);
+  } finally {
+    releaseGraphics(artwork);
+  }
+}
+
+function releaseGraphics(graphics) {
+  // p5.Graphics.remove() delegates to a broken Renderer2D.remove() in this p5 version.
+  p5.Element.prototype.remove.call(graphics);
+  graphics.canvas.width = 0;
+  graphics.canvas.height = 0;
+}
+
+function renderArtworkToTarget(p, target, renderState, renderWidth, renderHeight) {
   p.randomSeed(renderState.seed);
   p.noiseSeed(renderState.seed);
   const artPreset = initializeRenderPreset(renderState);
   const renderPalette = artPreset.palette;
 
-  if (renderState.process === PROCESS_MODES.clean.key) {
+  if (renderState.process === PROCESS_MODES.clean.key || (renderState.transparentArtwork && !renderState.activated)) {
     renderBaseCompositionToTarget(p, target, renderState, renderWidth, renderHeight, renderPalette, artPreset);
   } else {
     const processSource = p.createGraphics(renderWidth, renderHeight);
     processSource.pixelDensity(1);
     processSource.noSmooth();
-    renderBaseCompositionToTarget(p, processSource, renderState, renderWidth, renderHeight, renderPalette, artPreset);
-    target.background(renderPalette.background);
-    applyProcessToTarget(p, target, processSource, renderState, renderPalette, renderWidth, renderHeight);
+    try {
+      renderBaseCompositionToTarget(p, processSource, renderState, renderWidth, renderHeight, renderPalette, artPreset);
+      target.clear();
+      if (!renderState.transparentArtwork) target.background(renderPalette.background);
+      applyProcessToTarget(p, target, processSource, renderState, renderPalette, renderWidth, renderHeight);
+    } finally {
+      releaseGraphics(processSource);
+    }
   }
 
   if (renderState.typeProof) {
@@ -822,7 +862,88 @@ function downloadCanvasAsPng(canvas, filename) {
   });
 }
 
+function scaleInkAlpha(renderPalette, alpha) {
+  return Math.min(255, alpha * (renderPalette.alphaScale ?? 1));
+}
+
 function renderGestaltMachine(p, target, renderPalette, renderWidth, renderHeight, renderState, artPreset) {
+  if (!renderPalette.finish) {
+    drawGestaltElements(p, target, renderPalette, renderWidth, renderHeight, renderState, artPreset);
+    return;
+  }
+
+  const layer = p.createGraphics(renderWidth, renderHeight);
+  layer.pixelDensity(1);
+  try {
+    layer.clear();
+    drawGestaltElements(p, layer, renderPalette, renderWidth, renderHeight, renderState, artPreset);
+    applyColourFinish(p, layer, renderPalette.finish, renderWidth, renderHeight);
+    target.image(layer, 0, 0, renderWidth, renderHeight);
+  } finally {
+    releaseGraphics(layer);
+  }
+}
+
+// Paints the preset's signature colour treatment only where artwork already exists.
+function applyColourFinish(p, layer, finish, width, height) {
+  const context = layer.drawingContext;
+  const { colours } = finish;
+  context.save();
+  context.globalCompositeOperation = "source-atop";
+  context.globalAlpha = finish.alpha;
+
+  if (finish.type === "gradient") {
+    const radians = (finish.angle * Math.PI) / 180;
+    const half = (Math.abs(Math.cos(radians)) * width + Math.abs(Math.sin(radians)) * height) / 2;
+    const dx = Math.cos(radians) * half;
+    const dy = Math.sin(radians) * half;
+    const gradient = context.createLinearGradient(width / 2 - dx, height / 2 - dy, width / 2 + dx, height / 2 + dy);
+    colours.forEach((colour, index) => gradient.addColorStop(index / Math.max(1, colours.length - 1), colour));
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+  } else if (finish.type === "stripes") {
+    const stripe = Math.max(6, Math.min(width, height) * 0.035);
+    const span = width + height;
+    context.translate(width / 2, height / 2);
+    context.rotate((finish.angle * Math.PI) / 180);
+    for (let offset = -span, index = 0; offset < span; offset += stripe, index += 1) {
+      context.fillStyle = colours[index % colours.length];
+      context.fillRect(offset, -span, stripe, span * 2);
+    }
+  } else if (finish.type === "bars") {
+    const count = colours.length * 2;
+    const barWidth = width / count;
+    for (let index = 0; index < count; index += 1) {
+      context.fillStyle = colours[Math.floor(p.random(colours.length))];
+      context.fillRect(index * barWidth, 0, barWidth + 1, height);
+    }
+  } else if (finish.type === "grid") {
+    const columns = width >= height ? 6 : 4;
+    const rows = Math.max(2, Math.round(columns * height / width));
+    const cellWidth = width / columns;
+    const cellHeight = height / rows;
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        context.fillStyle = colours[Math.floor(p.random(colours.length))];
+        context.fillRect(column * cellWidth, row * cellHeight, cellWidth + 1, cellHeight + 1);
+      }
+    }
+  } else if (finish.type === "band") {
+    context.fillStyle = colours[0];
+    context.fillRect(0, 0, width, height);
+    context.globalAlpha = 1;
+    const bandHeight = height * p.random(0.08, 0.18);
+    const bandTop = height * p.random(0.15, 0.75) - bandHeight / 2;
+    context.fillStyle = colours[1];
+    context.fillRect(0, bandTop, width, bandHeight);
+    context.fillStyle = colours[2];
+    context.fillRect(width * p.random(0.1, 0.7), 0, width * 0.025, height);
+  }
+
+  context.restore();
+}
+
+function drawGestaltElements(p, target, renderPalette, renderWidth, renderHeight, renderState, artPreset) {
   const activeElements = getActiveElementDefinitions(renderState);
 
   if (activeElements.length === 0) {
@@ -835,11 +956,6 @@ function renderGestaltMachine(p, target, renderPalette, renderWidth, renderHeigh
   const marginY = renderHeight * 0.09;
   const focusX = getPrincipleFocusX(p, principle, renderWidth, renderState);
   const focusY = getPrincipleFocusY(p, principle, renderHeight, renderState);
-
-  if (shouldRenderAtmosphere(renderState)) {
-    const atmosphereModifiers = getGestaltModifiers(renderState, GESTALT_ELEMENTS.colour.key);
-    drawGestaltAtmosphere(p, target, renderPalette, renderWidth, renderHeight, artPreset, focusX, focusY, chaos, atmosphereModifiers);
-  }
 
   activeElements.forEach((element) => {
     const modifiers = getGestaltModifiers(renderState, element.key);
@@ -857,9 +973,6 @@ function renderGestaltMachine(p, target, renderPalette, renderWidth, renderHeigh
       case GESTALT_ELEMENTS.form.key:
         drawGestaltForms(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, focusX, focusY, modifiers);
         break;
-      case GESTALT_ELEMENTS.colour.key:
-        drawGestaltColour(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, marginX, marginY, focusX, focusY, renderState, modifiers);
-        break;
       case GESTALT_ELEMENTS.texture.key:
         drawGestaltTexture(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, marginX, marginY, modifiers);
         break;
@@ -875,26 +988,6 @@ function renderGestaltMachine(p, target, renderPalette, renderWidth, renderHeigh
   });
 }
 
-function drawGestaltAtmosphere(p, target, renderPalette, renderWidth, renderHeight, artPreset, focusX, focusY, chaos, modifiers) {
-  target.noStroke();
-  const atmosphereCount = Math.round((10 + chaos * 24) * (0.7 + modifiers.scaleFactor * 0.35));
-
-  for (let index = 0; index < atmosphereCount; index += 1) {
-    const tone = p.color(index % 5 === 0 ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
-    tone.setAlpha(10 + chaos * 24);
-    const radius = p.random(renderWidth * 0.03 * modifiers.scaleFactor, renderWidth * (0.08 + chaos * 0.1) * modifiers.scaleFactor);
-    const x = p.lerp(focusX, p.random(renderWidth * 0.1, renderWidth * 0.9), 0.72 + p.random() * 0.28);
-    const y = p.lerp(focusY, p.random(renderHeight * 0.1, renderHeight * 0.9), 0.72 + p.random() * 0.28);
-    target.fill(tone);
-    target.circle(x, y, radius * 2);
-  }
-
-  const veilTone = p.color(renderPalette.background);
-  veilTone.setAlpha(28);
-  target.fill(veilTone);
-  target.rect(renderWidth * 0.05, renderHeight * 0.06, renderWidth * 0.9, renderHeight * 0.88, 28);
-}
-
 function drawGestaltLines(p, target, renderPalette, renderWidth, renderHeight, artPreset, principle, chaos, focusX, focusY, renderState, modifiers) {
   target.noFill();
   const lineCount = Math.round((18 + chaos * 48) * (0.75 + modifiers.principleScaleFactor * 0.18));
@@ -907,7 +1000,7 @@ function drawGestaltLines(p, target, renderPalette, renderWidth, renderHeight, a
 
   for (let lineIndex = 0; lineIndex < lineCount; lineIndex += 1) {
     const tone = p.color(lineIndex % 6 === 0 ? renderPalette.accent : renderPalette.lines[lineIndex % renderPalette.lines.length]);
-    tone.setAlpha(70 + chaos * 70);
+    tone.setAlpha(scaleInkAlpha(renderPalette, 70 + chaos * 70));
     target.stroke(tone);
     target.strokeWeight(p.max(0.08, strokeBase + p.random() * strokeJitter));
     target.beginShape();
@@ -929,7 +1022,7 @@ function drawGestaltLines(p, target, renderPalette, renderWidth, renderHeight, a
 
 function drawGestaltSpace(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, marginX, marginY, focusX, focusY, modifiers) {
   const frameTone = p.color(renderPalette.lines[1]);
-  frameTone.setAlpha(90);
+  frameTone.setAlpha(scaleInkAlpha(renderPalette, 90));
   const voidTone = p.color(renderPalette.background);
   voidTone.setAlpha(210);
   const edgeWeight = p.max(0.8, renderWidth * 0.0008 * modifiers.thicknessFactor);
@@ -950,7 +1043,7 @@ function drawGestaltSpace(p, target, renderPalette, renderWidth, renderHeight, p
 
   for (let band = 0; band < 4; band += 1) {
     const bandTone = p.color(renderPalette.lines[band % renderPalette.lines.length]);
-    bandTone.setAlpha(24 + chaos * 32 + modifiers.thicknessFactor * 24);
+    bandTone.setAlpha(scaleInkAlpha(renderPalette, 24 + chaos * 32 + modifiers.thicknessFactor * 24));
     target.fill(bandTone);
     const bandHeight = renderHeight * (0.018 + band * 0.008) * modifiers.thicknessFactor;
     const y = p.lerp(marginY * 1.3, renderHeight - marginY * 1.7, band / 3);
@@ -960,7 +1053,7 @@ function drawGestaltSpace(p, target, renderPalette, renderWidth, renderHeight, p
 
 function drawGestaltShapes(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, marginX, marginY, focusX, focusY, renderState, modifiers) {
   const strokeTone = p.color(renderPalette.background);
-  strokeTone.setAlpha(64 + modifiers.elementThicknessFactor * 18);
+  strokeTone.setAlpha(scaleInkAlpha(renderPalette, 64 + modifiers.elementThicknessFactor * 18));
   target.stroke(strokeTone);
   target.strokeWeight(p.max(0.5, modifiers.thicknessFactor * 1.4));
   const count = Math.round(8 + chaos * 18);
@@ -968,7 +1061,7 @@ function drawGestaltShapes(p, target, renderPalette, renderWidth, renderHeight, 
   for (let index = 0; index < count; index += 1) {
     const size = p.min(renderWidth, renderHeight) * p.random(0.03, (0.1 + chaos * 0.1) * modifiers.elementScaleFactor);
     const tone = p.color(index % 4 === 0 ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
-    tone.setAlpha(85 + chaos * 75);
+    tone.setAlpha(scaleInkAlpha(renderPalette, 85 + chaos * 75));
     const anchor = getPrinciplePlacement(p, principle, index, count, renderWidth, renderHeight, marginX, marginY, focusX, focusY, renderState);
     target.fill(tone);
 
@@ -995,7 +1088,7 @@ function drawGestaltForms(p, target, renderPalette, renderWidth, renderHeight, p
     const shadowTone = p.color(renderPalette.background);
     shadowTone.setAlpha(58);
     const formTone = p.color(index % 2 === 0 ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
-    formTone.setAlpha(70 + depth * 90);
+    formTone.setAlpha(scaleInkAlpha(renderPalette, 70 + depth * 90));
 
     target.push();
     target.translate(x, y);
@@ -1005,26 +1098,6 @@ function drawGestaltForms(p, target, renderPalette, renderWidth, renderHeight, p
     target.rect(-baseWidth * 0.45 + renderWidth * 0.008 * modifiers.thicknessFactor, -baseHeight * 0.45 + renderWidth * 0.008 * modifiers.thicknessFactor, baseWidth, baseHeight, 20);
     target.fill(formTone);
     target.rect(-baseWidth * 0.45, -baseHeight * 0.45, baseWidth, baseHeight, 20);
-    target.pop();
-  }
-}
-
-function drawGestaltColour(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, marginX, marginY, focusX, focusY, renderState, modifiers) {
-  const swatchCount = Math.round(6 + chaos * 8);
-  for (let index = 0; index < swatchCount; index += 1) {
-    const progress = index / p.max(1, swatchCount - 1);
-    const tone = p.color(index % 3 === 0 ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
-    tone.setAlpha(36 + progress * 120);
-    const swatchWidth = renderWidth * (0.04 + progress * 0.12) * modifiers.scaleFactor;
-    const swatchHeight = renderHeight * (0.03 + progress * 0.06) * modifiers.thicknessFactor;
-    const anchor = getPrinciplePlacement(p, principle, index, swatchCount, renderWidth, renderHeight, marginX, marginY, focusX, focusY, renderState);
-
-    target.push();
-    target.translate(anchor.x, anchor.y);
-    target.rotate(getPrincipleRotation(p, principle, progress, chaos) * 0.65 + modifiers.angleOffset * 0.9);
-    target.noStroke();
-    target.fill(tone);
-    target.rect(-swatchWidth * 0.5, -swatchHeight * 0.5, swatchWidth, swatchHeight, 16);
     target.pop();
   }
 }
@@ -1044,7 +1117,7 @@ function drawGestaltTexture(p, target, renderPalette, renderWidth, renderHeight,
     for (let column = 0; column < columns; column += 1) {
       const progress = getTextureProgress(p, principle, column, row, columns, rows);
       const tone = p.color(progress > 0.72 ? renderPalette.accent : renderPalette.lines[(row + column) % renderPalette.lines.length]);
-      tone.setAlpha(26 + progress * 128);
+      tone.setAlpha(scaleInkAlpha(renderPalette, 26 + progress * 128));
       target.fill(tone);
       const baseX = marginX + column * cellWidth + cellWidth * 0.5;
       const baseY = marginY + row * cellHeight + cellHeight * 0.5;
@@ -1067,7 +1140,7 @@ function drawGestaltValue(p, target, renderPalette, renderWidth, renderHeight, p
   for (let index = 0; index < bandCount; index += 1) {
     const progress = index / p.max(1, bandCount - 1);
     const tone = p.color(index % 4 === 0 ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
-    tone.setAlpha(18 + getValueAlpha(principle, progress) * (160 + chaos * 60 + modifiers.thicknessFactor * 70));
+    tone.setAlpha(scaleInkAlpha(renderPalette, 18 + getValueAlpha(principle, progress) * (160 + chaos * 60 + modifiers.thicknessFactor * 70)));
     target.fill(tone);
 
     if (isHorizontal) {
@@ -1081,9 +1154,9 @@ function drawGestaltValue(p, target, renderPalette, renderWidth, renderHeight, p
 function drawGestaltTypography(p, target, renderPalette, renderWidth, renderHeight, principle, chaos, marginX, marginY, focusX, focusY, modifiers) {
   const columnWidth = (renderWidth - marginX * 2) / 12;
   const ruleTone = p.color(renderPalette.lines[1]);
-  ruleTone.setAlpha(88);
+  ruleTone.setAlpha(scaleInkAlpha(renderPalette, 88));
   const blockTone = p.color(renderPalette.accent);
-  blockTone.setAlpha(110 + chaos * 70);
+  blockTone.setAlpha(scaleInkAlpha(renderPalette, 110 + chaos * 70));
 
   target.stroke(ruleTone);
   target.strokeWeight(p.max(0.7, renderWidth * 0.0005 * modifiers.thicknessFactor));
@@ -1110,7 +1183,7 @@ function drawGestaltTypography(p, target, renderPalette, renderWidth, renderHeig
     const rowX = principle.key === GESTALT_PRINCIPLES.balance.key ? renderWidth * 0.5 - rowWidth * 0.5 : p.lerp(marginX, renderWidth - marginX - rowWidth, p.noise(index * 0.24, chaos));
     const rowY = headlineY + renderHeight * 0.16 + index * renderHeight * 0.048;
     const rowTone = p.color(renderPalette.lines[index % renderPalette.lines.length]);
-    rowTone.setAlpha(58 + chaos * 55);
+    rowTone.setAlpha(scaleInkAlpha(renderPalette, 58 + chaos * 55));
     target.fill(rowTone);
     target.push();
     target.translate(rowX + rowWidth * 0.5, rowY + renderHeight * 0.008 * modifiers.thicknessFactor);
@@ -1356,6 +1429,7 @@ export function createGestaltEngine(containerElement, options = {}) {
       thumbnail.pixelDensity(1);
       renderCompositionToTarget(sketchInstance, thumbnail, candidateState, thumbnailWidth, thumbnailHeight);
       const imageUrl = (thumbnail.elt || thumbnail.canvas).toDataURL("image/png");
+      releaseGraphics(thumbnail);
 
       return {
         seed,
@@ -1367,6 +1441,12 @@ export function createGestaltEngine(containerElement, options = {}) {
         processScale: candidateState.processScale,
         chaos: candidateState.chaos,
         proof: candidateState.proof,
+        backgroundColor: candidateState.backgroundColor,
+        backgroundOpacity: candidateState.backgroundOpacity,
+        colourPreset: candidateState.colourPreset,
+        colourHue: candidateState.colourHue,
+        colourSaturation: candidateState.colourSaturation,
+        colourBrightness: candidateState.colourBrightness,
         typeProof: candidateState.typeProof,
         typeLayout: candidateState.typeLayout,
         compositionSummary: buildCompositionSummary(candidateState),
@@ -1384,10 +1464,14 @@ export function createGestaltEngine(containerElement, options = {}) {
     const exportSurface = sketchInstance.createGraphics(nextState.exportWidth, nextState.exportHeight);
     exportSurface.pixelDensity(1);
     exportSurface.noSmooth();
-    renderCompositionToTarget(sketchInstance, exportSurface, nextState, nextState.exportWidth, nextState.exportHeight);
-    const filename = buildExportFilename(nextState, { includeExtension: true });
-    await downloadCanvasAsPng(exportSurface.canvas || exportSurface.elt, filename);
-    return filename;
+    try {
+      renderCompositionToTarget(sketchInstance, exportSurface, nextState, nextState.exportWidth, nextState.exportHeight);
+      const filename = buildExportFilename(nextState, { includeExtension: true });
+      await downloadCanvasAsPng(exportSurface.canvas || exportSurface.elt, filename);
+      return filename;
+    } finally {
+      releaseGraphics(exportSurface);
+    }
   }
 
   function destroy() {

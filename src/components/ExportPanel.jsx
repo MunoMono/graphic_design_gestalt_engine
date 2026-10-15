@@ -1,6 +1,7 @@
 import { Button, InlineNotification, Select, SelectItem, Tag, TextInput, Tile } from "@carbon/react";
 import { EXPORT_DPI_OPTIONS, EXPORT_FORMAT_OPTIONS, EXPORT_SCALE_OPTIONS, PROCESS_OPTIONS } from "../engine/constants";
 import { formatPhysicalSize, getDpiSelectValue, getScaleSelectValue } from "../engine/exportSizing";
+import { getBackgroundLabel } from "../engine/background";
 
 const PROCESS_LABELS = PROCESS_OPTIONS.reduce((accumulator, option) => {
   accumulator[option.value] = option.label;
@@ -129,7 +130,7 @@ export default function ExportPanel({
           <Tag type="cool-gray">{metrics.finalWidth}x{metrics.finalHeight}</Tag>
           <Tag type="cool-gray">{metrics.scaleLabel}</Tag>
           <Tag type="cool-gray">{metrics.dpi}dpi</Tag>
-          <Tag type="blue">{state.proof}</Tag>
+          <Tag type="blue">Background {getBackgroundLabel(state)}</Tag>
           <Tag type={state.process === "clean" ? "gray" : "purple"}>{processLabel}</Tag>
           {state.process !== "clean" ? <Tag type="purple">I {state.processIntensity} / S {state.processScale}</Tag> : null}
           <Tag type={state.typeProof ? "green" : "gray"}>{state.typeProof ? `Type ${state.typeLayout}` : "Type Off"}</Tag>

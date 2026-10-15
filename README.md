@@ -19,7 +19,6 @@ Elements:
 - Space
 - Shape
 - Form
-- Colour
 - Texture
 - Value
 - Typography
@@ -65,7 +64,7 @@ Process Scale controls whether the treatment feels finer or coarser, smaller or 
 
 The export system supports:
 
-- White / Black proof modes
+- full-colour backgrounds with HEX/RGB input, hue/saturation/brightness controls, swatches, and opacity
 - Type Proof on/off
 - Type Layout left/centre
 - deterministic seeds
@@ -76,6 +75,10 @@ The export system supports:
 - production filename generation
 
 Exports are deterministic from the current seed and matrix state. Batch review remains preview-sized for performance, while PNG export renders at the chosen output size.
+
+The live canvas workspace fills the available viewport height and fits the selected format without stretching or cropping. Export formats and output dimensions are independent of the workspace's on-screen size.
+
+Background opacity affects only the background, not the artwork. Transparency is shown with a checkerboard (not included in PNG downloads). Sandbox JSON stores `backgroundColor` as a six-digit hex string and `backgroundOpacity` from 0 to 100; legacy `proof: "white"` / `"black"` states still load. Artwork contrast adapts to the background colour. Custom background colour and opacity are included in export filenames.
 
 ## Technology stack
 
@@ -137,3 +140,7 @@ MRes RCA PGCHE FRSA
 ## License
 
 License: to be confirmed.
+
+## Colour Presets
+
+The Colour select replaces the old Colour element. `Mono` keeps the original monochrome inks; six mood-board presets recolour every element, process ink, and chromatic offset: California New Wave, Graphic Punk, Corporate Funk, Acid House, Nakameguro, and Total Total. Hue shift (-180 to 180), saturation (0 to 200%), and brightness (-100 to 100) sliders riff on the active preset. Inks too close to the background are dropped automatically. The background stays independent. Sandbox JSON stores `colourPreset`, `colourHue`, `colourSaturation`, and `colourBrightness`; non-default colour settings appear in export filenames.

@@ -3,7 +3,6 @@ export const ELEMENT_OPTIONS = [
   { value: "space", label: "Space" },
   { value: "shape", label: "Shape" },
   { value: "form", label: "Form" },
-  { value: "colour", label: "Colour" },
   { value: "texture", label: "Texture" },
   { value: "value", label: "Value" },
   { value: "typography", label: "Typography" },
@@ -93,12 +92,6 @@ export const GESTALT_CONTROL_SECTIONS = {
       title: "Form",
       description:
         "Form encloses a volume or three-dimensional area. Light and dark value variations can create form. Space is used to emphasise form.",
-    },
-    {
-      key: "colour",
-      title: "Colour",
-      description:
-        "Colour is light reflected from a surface. It can create emphasis, harmony, emotions, unity, and movement. Colour has three distinct qualities: Hue refers to the dominant colour family. Value refers to the lightness or darkness of a colour. Intensity refers to the brightness or dullness of a colour.",
     },
     {
       key: "texture",
@@ -206,6 +199,10 @@ export const DEFAULT_MACHINE_STATE = {
   principle: "balance",
   chaos: 30,
   proof: "white",
+  colourPreset: "mono",
+  colourHue: 0,
+  colourSaturation: 100,
+  colourBrightness: 0,
   process: "clean",
   processIntensity: 50,
   processScale: 50,

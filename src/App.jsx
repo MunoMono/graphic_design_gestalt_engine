@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Theme } from "@carbon/react";
+import { InlineNotification, Theme } from "@carbon/react";
 import AppHeader from "./components/AppHeader";
 import BatchReview from "./components/BatchReview";
 import CanvasStage from "./components/CanvasStage";
 import ControlPanel from "./components/ControlPanel";
 import ExportPanel from "./components/ExportPanel";
 import SandboxPanel from "./components/SandboxPanel";
-import StatusBar from "./components/StatusBar";
-import { DEFAULT_MACHINE_STATE, GESTALT_CONTROL_SECTIONS, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGestaltControls, getActiveGestaltItems } from "./engine/constants";
+import { DEFAULT_MACHINE_STATE, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGestaltControls, getActiveGestaltItems } from "./engine/constants";
 import { buildExportFilename } from "./engine/exportNaming";
 import { applyExportMetricsToState, getExportMetrics } from "./engine/exportSizing";
 import { createGestaltEngine, normalizeMachineState } from "./engine/gestaltEngine";
@@ -27,6 +26,12 @@ function buildSandboxStateSnapshot(state) {
     principle: state.principle,
     chaos: state.chaos,
     proof: state.proof,
+    backgroundColor: state.backgroundColor,
+    backgroundOpacity: state.backgroundOpacity,
+    colourPreset: state.colourPreset,
+    colourHue: state.colourHue,
+    colourSaturation: state.colourSaturation,
+    colourBrightness: state.colourBrightness,
     process: state.process,
     processIntensity: state.processIntensity,
     processScale: state.processScale,
@@ -153,7 +158,7 @@ export default function App() {
 
       if (keyValue === "s") {
         event.preventDefault();
-        await engineRef.current.exportPng(engineState);
+        await handleExport();
         return;
       }
 
@@ -218,8 +223,14 @@ export default function App() {
     await applyState({ chaos: value });
   }
 
-  async function handleProofChange(value) {
-    await applyState({ proof: value });
+  async function handleBackgroundChange(patch) {
+    setBatchCandidates([]);
+    await applyState(patch);
+  }
+
+  async function handleColourChange(patch) {
+    setBatchCandidates([]);
+    await applyState(patch);
   }
 
   async function handleProcessChange(value) {
@@ -363,6 +374,16 @@ export default function App() {
     await applyState({ customHeight: Number.isFinite(nextHeight) && nextHeight > 0 ? nextHeight : engineState.customHeight });
   }
 
+  async function handleExport() {
+    setError("");
+
+    try {
+      await engineRef.current.exportPng(engineState);
+    } catch (nextError) {
+      setError(nextError.message);
+    }
+  }
+
   function handleSandboxCodeChange(value) {
     setSandboxDirty(true);
     setSandboxStatus(null);
@@ -382,6 +403,9 @@ export default function App() {
       const nextState = hydrateMachineState({
         ...engineState,
         ...parsedConfig,
+        ...(parsedConfig.proof && parsedConfig.backgroundColor === undefined
+          ? { backgroundColor: undefined }
+          : {}),
         gestaltControls: parsedConfig.gestaltControls ?? engineState.gestaltControls,
       });
 
@@ -433,8 +457,6 @@ export default function App() {
   const filenamePreview = useMemo(() => buildExportFilename(engineState, { includeExtension: true }), [engineState]);
   const exportMetrics = useMemo(() => getExportMetrics(engineState), [engineState]);
   const processLabel = PROCESS_OPTIONS.find((option) => option.value === engineState.process)?.label ?? engineState.process;
-  const activeElements = getActiveGestaltItems(engineState.gestaltControls, "elements");
-  const activePrinciples = getActiveGestaltItems(engineState.gestaltControls, "principles");
   const matrixSummary = buildActiveSummary(engineState);
 
   return (
@@ -448,7 +470,8 @@ export default function App() {
               seedInput={seedInput}
               summaryLabel={matrixSummary}
               onChaosChange={handleChaosChange}
-              onProofChange={handleProofChange}
+              onBackgroundChange={handleBackgroundChange}
+              onColourChange={handleColourChange}
               onProcessChange={handleProcessChange}
               onProcessIntensityChange={handleProcessIntensityChange}
               onProcessScaleChange={handleProcessScaleChange}
@@ -468,8 +491,8 @@ export default function App() {
           </div>
 
           <div className="app-shell__centre">
+            {error ? <InlineNotification kind="error" lowContrast hideCloseButton title="Engine error" subtitle={error} /> : null}
             <CanvasStage stageRef={stageRef} ready={engineReady} viewLabel={engineState.activated ? "Composition view" : "Blank view"} activated={engineState.activated} />
-            <StatusBar state={{ ...engineState, process: processLabel, exportWidth: exportMetrics.finalWidth, exportHeight: exportMetrics.finalHeight, matrixSummary, activeElementCount: activeElements.length, activePrincipleCount: activePrinciples.length }} error={error} />
           </div>
 
           <div className="app-shell__right">
@@ -491,7 +514,7 @@ export default function App() {
               onCustomDpiChange={handleCustomDpiChange}
               onCustomWidthChange={handleCustomWidthChange}
               onCustomHeightChange={handleCustomHeightChange}
-              onExport={() => engineRef.current?.exportPng(engineState)}
+              onExport={handleExport}
               disabled={!engineReady}
             />
             <BatchReview candidates={batchCandidates} state={{ ...engineState, process: processLabel, matrixSummary }} onCandidateSelect={handleCandidateSelect} loading={batchLoading} />

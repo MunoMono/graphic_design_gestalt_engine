@@ -29,7 +29,6 @@ The available visual materials are:
 - `Space`
 - `Shape`
 - `Form`
-- `Colour`
 - `Texture`
 - `Value`
 - `Typography`
@@ -62,14 +61,15 @@ Principles should change how the element is composed, not merely decorate it.
 
 Chaos should intensify structure, disruption, density, rotation, or spread while staying deterministic for the same seed and settings.
 
-## Proof Modes
+## Background
 
-The designer-facing proof modes are now intentionally minimal:
+The background picker supports the full RGB colour range with a saturation/brightness plane, hue and opacity sliders, HEX/RGB fields, and preset swatches.
 
-- `White`
-- `Black`
+- `backgroundColor`: six-digit hex colour
+- `backgroundOpacity`: 0 to 100 percent
+- legacy `proof: "white"` / `"black"` configs remain supported when no background colour is supplied
 
-These are review grounds, not separate identity palettes. The composition should remain legible on both.
+Artwork uses light or dark ink according to background brightness. Background opacity does not fade the artwork. Transparent PNGs preserve alpha; the preview checkerboard is never exported. Original white and black backgrounds remain available as swatches.
 
 ## Type Proof
 
@@ -137,3 +137,7 @@ Riskier edits change:
 - control wiring
 
 When tuning visuals, prefer local edits inside the gestalt rendering functions rather than reintroducing separate study systems.
+
+## Colour Presets
+
+The Colour select replaces the old Colour element. `Mono` keeps the original monochrome inks; six mood-board presets recolour every element, process ink, and chromatic offset: California New Wave, Graphic Punk, Corporate Funk, Acid House, Nakameguro, and Total Total. Hue shift (-180 to 180), saturation (0 to 200%), and brightness (-100 to 100) sliders riff on the active preset. Inks too close to the background are dropped automatically. The background stays independent. Sandbox JSON stores `colourPreset`, `colourHue`, `colourSaturation`, and `colourBrightness`; non-default colour settings appear in export filenames.

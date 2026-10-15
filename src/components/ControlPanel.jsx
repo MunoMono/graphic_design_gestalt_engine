@@ -1,5 +1,7 @@
 import { Accordion, AccordionItem, Button, Select, SelectItem, Slider, Tag, Tile } from "@carbon/react";
-import { PROCESS_OPTIONS, PROOF_OPTIONS } from "../engine/constants";
+import { PROCESS_OPTIONS } from "../engine/constants";
+import { COLOUR_PRESET_OPTIONS } from "../engine/colourPresets";
+import BackgroundPicker from "./BackgroundPicker";
 import ElementsAccordion from "./ElementsAccordion";
 import PrinciplesAccordion from "./PrinciplesAccordion";
 import SeedControls from "./SeedControls";
@@ -10,7 +12,8 @@ export default function ControlPanel({
   seedInput,
   summaryLabel,
   onChaosChange,
-  onProofChange,
+  onBackgroundChange,
+  onColourChange,
   onProcessChange,
   onProcessIntensityChange,
   onProcessScaleChange,
@@ -25,6 +28,7 @@ export default function ControlPanel({
   onRegenerateSeed,
   disabled,
 }) {
+  const colourControlsDisabled = disabled || state.colourPreset === "mono";
   const processControlsDisabled = disabled || state.process === "clean";
 
   return (
@@ -75,7 +79,7 @@ export default function ControlPanel({
 
         <div className="panel-stack panel-stack--tight panel-section">
           <div className="panel-heading panel-heading--compact">
-            <p className="panel-eyebrow">Engine and proof controls</p>
+            <p className="panel-eyebrow">Engine, background and colour controls</p>
           </div>
 
           <Slider
@@ -89,11 +93,32 @@ export default function ControlPanel({
             onChange={({ value }) => onChaosChange(Number(value))}
           />
 
-          <Select id="proof-select" labelText="Proof" value={state.proof} onChange={(event) => onProofChange(event.target.value)}>
-            {PROOF_OPTIONS.map((option) => (
+          <BackgroundPicker color={state.backgroundColor} opacity={state.backgroundOpacity} onChange={onBackgroundChange} disabled={disabled} />
+
+          <Select id="colour-select" labelText="Colour" value={state.colourPreset} onChange={(event) => onColourChange({ colourPreset: event.target.value })}>
+            {COLOUR_PRESET_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value} text={option.label} />
             ))}
           </Select>
+
+          {[
+            { key: "colourHue", label: "Colour Hue Shift", min: -180, max: 180 },
+            { key: "colourSaturation", label: "Colour Saturation", min: 0, max: 200 },
+            { key: "colourBrightness", label: "Colour Brightness", min: -100, max: 100 },
+          ].map(({ key, label, min, max }) => (
+            <Slider
+              key={key}
+              id={`${key}-slider`}
+              labelText={label}
+              min={min}
+              max={max}
+              step={1}
+              value={state[key]}
+              hideTextInput={false}
+              disabled={colourControlsDisabled}
+              onChange={({ value }) => onColourChange({ [key]: Number(value) })}
+            />
+          ))}
 
           <Select id="process-select" labelText="Process" value={state.process} onChange={(event) => onProcessChange(event.target.value)}>
             {PROCESS_OPTIONS.map((option) => (

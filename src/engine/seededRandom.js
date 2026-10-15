@@ -1,3 +1,4 @@
+import { isDefaultColourState } from "./colourPresets.js";
 export function hashStringToSeed(value) {
   let hash = 2166136261;
 
@@ -26,6 +27,12 @@ export function buildDeterministicBatchSeeds(machineState, count) {
     principle: machineState.principle,
     chaos: machineState.chaos,
     proof: machineState.proof,
+    ...((machineState.backgroundColor && !["#f7f5ef", "#050607"].includes(machineState.backgroundColor)) || machineState.backgroundOpacity < 100
+      ? { backgroundColor: machineState.backgroundColor, backgroundOpacity: machineState.backgroundOpacity }
+      : {}),
+    ...(!isDefaultColourState(machineState)
+      ? { colourPreset: machineState.colourPreset, colourHue: machineState.colourHue, colourSaturation: machineState.colourSaturation, colourBrightness: machineState.colourBrightness }
+      : {}),
     process: machineState.process,
     processIntensity: machineState.processIntensity,
     processScale: machineState.processScale,
