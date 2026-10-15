@@ -1519,6 +1519,29 @@ export function createGestaltEngine(containerElement, options = {}) {
     return updateGestaltEngine(nextState);
   }
 
+  // Blank canvases would give 12 identical blanks, so each candidate gets a seeded element/principle mix.
+  function buildRandomComposition(state, seed) {
+    let value = seed >>> 0;
+    const next = () => {
+      value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+      return value / 4294967296;
+    };
+    const pick = (keys, count) => [...keys].sort(() => next() - 0.5).slice(0, count);
+    const elementKeys = pick(Object.keys(GESTALT_ELEMENTS), 1 + Math.floor(next() * 3));
+    const [principleKey] = pick(Object.keys(GESTALT_PRINCIPLES), 1);
+    const toggle = (section, keys) => Object.fromEntries(Object.entries(state.gestaltControls[section]).map(([key, controls]) => [key, { ...controls, active: keys.includes(key) }]));
+
+    return {
+      element: elementKeys[0],
+      principle: principleKey,
+      gestaltControls: {
+        ...state.gestaltControls,
+        elements: toggle("elements", elementKeys),
+        principles: toggle("principles", [principleKey]),
+      },
+    };
+  }
+
   function loadSeed(seed, baseState = currentState) {
     return normalizeState({ ...baseState, seed });
   }
@@ -1530,8 +1553,14 @@ export function createGestaltEngine(containerElement, options = {}) {
   function generateBatchCandidates(state, count = 12) {
     const nextState = normalizeState({ ...state, activated: true });
     const seeds = buildDeterministicBatchSeeds(nextState, count);
+    const isBlank = getActiveGestaltItems(nextState.gestaltControls, "elements").length === 0;
     const candidates = seeds.map((seed) => {
-      const candidateState = normalizeState({ ...nextState, seed, activated: true });
+      const candidateState = normalizeState({
+        ...nextState,
+        ...(isBlank ? buildRandomComposition(nextState, seed) : {}),
+        seed,
+        activated: true,
+      });
       const aspectRatio = nextState.width / nextState.height;
       const longSide = 520;
       const thumbnailWidth = aspectRatio >= 1 ? longSide : Math.round(longSide * aspectRatio);
@@ -1560,6 +1589,7 @@ export function createGestaltEngine(containerElement, options = {}) {
         colourBrightness: candidateState.colourBrightness,
         typeProof: candidateState.typeProof,
         typeLayout: candidateState.typeLayout,
+        gestaltControls: candidateState.gestaltControls,
         compositionSummary: buildCompositionSummary(candidateState),
         elementLabel: getCurrentElement(candidateState).label,
         principleLabel: getCurrentPrinciple(candidateState).label,

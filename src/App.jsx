@@ -315,6 +315,7 @@ export default function App() {
       const result = await engineRef.current.generateBatchCandidates({ ...engineState, activated: true }, 12);
       setEngineState((currentState) => applyExportMetricsToState({ ...currentState, activated: true }));
       setBatchCandidates(result.candidates);
+      requestAnimationFrame(() => document.querySelector(".app-panel--batch")?.scrollIntoView({ behavior: "smooth", block: "start" }));
     } catch (nextError) {
       setError(nextError.message);
     } finally {
@@ -322,7 +323,7 @@ export default function App() {
     }
   }
 
-  async function handleCandidateSelect(seed) {
+  async function handleCandidateSelect(candidate) {
     if (!engineRef.current) {
       return;
     }
@@ -330,7 +331,13 @@ export default function App() {
     setError("");
 
     try {
-      setEngineState((currentState) => engineRef.current.loadSeed(seed, currentState));
+      setEngineState((currentState) => engineRef.current.loadSeed(candidate.seed, {
+        ...currentState,
+        element: candidate.element,
+        principle: candidate.principle,
+        gestaltControls: candidate.gestaltControls,
+      }));
+      document.querySelector(".app-panel--canvas, canvas")?.scrollIntoView({ behavior: "smooth", block: "center" });
     } catch (nextError) {
       setError(nextError.message);
     }

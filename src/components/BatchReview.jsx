@@ -16,7 +16,7 @@ export default function BatchReview({ candidates, state, onCandidateSelect, load
 
       <div className="candidate-grid">
         {candidates.map((candidate) => (
-          <button key={candidate.seed} type="button" className="candidate-card" onClick={() => onCandidateSelect(candidate.seed)}>
+          <button key={candidate.seed} type="button" className="candidate-card" onClick={() => onCandidateSelect(candidate)}>
             <img src={candidate.imageUrl} alt={`Seed ${candidate.seed}`} className="candidate-card__image" />
             <div className="candidate-card__meta">
               <strong>Seed {candidate.seed}</strong>
