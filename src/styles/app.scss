@@ -1,4 +1,6 @@
-@use "@carbon/styles";
+@use "@carbon/styles" with (
+  $font-path: "@ibm/plex"
+);
 
 :root {
   color-scheme: light dark;

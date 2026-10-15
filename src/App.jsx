@@ -10,6 +10,7 @@ import { DEFAULT_MACHINE_STATE, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGest
 import { buildExportFilename } from "./engine/exportNaming";
 import { applyExportMetricsToState, getExportMetrics } from "./engine/exportSizing";
 import { createGestaltEngine, normalizeMachineState } from "./engine/gestaltEngine";
+import { parseSandboxCode } from "./engine/sandboxParse";
 
 function isEditableTarget(target) {
   const tagName = target?.tagName;
@@ -394,7 +395,7 @@ export default function App() {
     setError("");
 
     try {
-      const parsedConfig = JSON.parse(sandboxCode);
+      const { value: parsedConfig, repaired } = parseSandboxCode(sandboxCode);
 
       if (!parsedConfig || typeof parsedConfig !== "object" || Array.isArray(parsedConfig)) {
         throw new Error("Sandbox input must be a JSON object.");
@@ -416,7 +417,9 @@ export default function App() {
       setSandboxStatus({
         kind: "success",
         title: "Code applied",
-        subtitle: "The composition state was updated from the sandbox JSON.",
+        subtitle: repaired
+          ? "Small JSON slips (missing or trailing commas, comments, unquoted keys) were fixed and the composition was updated."
+          : "The composition state was updated from the sandbox JSON.",
       });
     } catch (nextError) {
       setSandboxStatus({

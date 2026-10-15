@@ -1038,16 +1038,46 @@ function drawGestaltSpace(p, target, renderPalette, renderWidth, renderHeight, p
   const voidY = p.constrain(focusY - voidHeight * 0.5, marginY * 1.2, renderHeight - marginY * 1.2 - voidHeight);
 
   target.noStroke();
-  target.fill(voidTone);
-  target.rect(voidX, voidY, voidWidth, voidHeight, 22);
-
-  for (let band = 0; band < 4; band += 1) {
-    const bandTone = p.color(renderPalette.lines[band % renderPalette.lines.length]);
+  const bands = getSpaceBands(p, principle);
+  bands.forEach((band, index) => {
+    const bandTone = p.color(index === bands.length - 1 && principle.key === GESTALT_PRINCIPLES.emphasis.key ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
     bandTone.setAlpha(scaleInkAlpha(renderPalette, 24 + chaos * 32 + modifiers.thicknessFactor * 24));
     target.fill(bandTone);
-    const bandHeight = renderHeight * (0.018 + band * 0.008) * modifiers.thicknessFactor;
-    const y = p.lerp(marginY * 1.3, renderHeight - marginY * 1.7, band / 3);
-    target.rect(marginX * 1.15, y, renderWidth - marginX * 2.3, bandHeight, 999);
+    const bandHeight = renderHeight * band.height * modifiers.thicknessFactor;
+    const y = p.lerp(marginY * 1.3, renderHeight - marginY * 1.7, band.y);
+    const inset = (renderWidth - marginX * 2.3) * band.inset;
+    target.rect(marginX * 1.15 + inset, y, renderWidth - marginX * 2.3 - inset * 2, bandHeight, 999);
+  });
+
+  target.fill(voidTone);
+  target.stroke(frameTone);
+  target.strokeWeight(edgeWeight);
+  target.rect(voidX, voidY, voidWidth, voidHeight, 22);
+}
+
+function getSpaceBands(p, principle) {
+  const make = (count, fn) => Array.from({ length: count }, (_, index) => fn(index / p.max(1, count - 1), index));
+  switch (principle.key) {
+    case GESTALT_PRINCIPLES.unityHarmony.key:
+      return make(6, (t) => ({ y: t, height: 0.022, inset: 0.08 }));
+    case GESTALT_PRINCIPLES.variety.key:
+      return make(7, () => ({ y: p.random(), height: p.random(0.008, 0.06), inset: p.random(0, 0.3) }));
+    case GESTALT_PRINCIPLES.balance.key:
+      return make(5, (t) => ({ y: t, height: 0.016 + (1 - Math.abs(t - 0.5) * 2) * 0.03, inset: Math.abs(t - 0.5) * 0.4 }));
+    case GESTALT_PRINCIPLES.gradations.key:
+      return make(8, (t) => ({ y: t, height: 0.006 + t * 0.05, inset: 0 }));
+    case GESTALT_PRINCIPLES.emphasis.key:
+      return [...make(4, (t) => ({ y: t, height: 0.01, inset: 0.2 })), { y: 0.42, height: 0.1, inset: 0 }];
+    case GESTALT_PRINCIPLES.rhythm.key:
+      return make(9, (t, index) => ({ y: t, height: index % 3 === 0 ? 0.04 : 0.012, inset: 0.05 }));
+    case GESTALT_PRINCIPLES.movement.key:
+      return make(6, (t) => ({ y: t, height: 0.02, inset: t * 0.4 }));
+    case GESTALT_PRINCIPLES.pattern.key:
+      return make(12, (t) => ({ y: t, height: 0.014, inset: 0 }));
+    case GESTALT_PRINCIPLES.proportion.key:
+      return [0, 0.236, 0.382, 0.618, 1].map((y, index) => ({ y, height: 0.012 + index * 0.01, inset: 0 }));
+    default:
+      return make(4, (t, index) => ({ y: t, height: 0.018 + index * 0.008, inset: 0 }));
   }
 }
 
@@ -1059,7 +1089,16 @@ function drawGestaltShapes(p, target, renderPalette, renderWidth, renderHeight, 
   const count = Math.round(8 + chaos * 18);
 
   for (let index = 0; index < count; index += 1) {
-    const size = p.min(renderWidth, renderHeight) * p.random(0.03, (0.1 + chaos * 0.1) * modifiers.elementScaleFactor);
+    const maxSize = (0.1 + chaos * 0.1) * modifiers.elementScaleFactor;
+    const progress = index / p.max(1, count - 1);
+    const sizeFactor = principle.key === GESTALT_PRINCIPLES.unityHarmony.key
+      ? 0.07 * modifiers.elementScaleFactor
+      : principle.key === GESTALT_PRINCIPLES.gradations.key
+        ? p.lerp(0.02, maxSize * 1.3, progress)
+        : principle.key === GESTALT_PRINCIPLES.variety.key
+          ? p.random(0.015, maxSize * 1.6)
+          : p.random(0.03, maxSize);
+    const size = p.min(renderWidth, renderHeight) * sizeFactor;
     const tone = p.color(index % 4 === 0 ? renderPalette.accent : renderPalette.lines[index % renderPalette.lines.length]);
     tone.setAlpha(scaleInkAlpha(renderPalette, 85 + chaos * 75));
     const anchor = getPrinciplePlacement(p, principle, index, count, renderWidth, renderHeight, marginX, marginY, focusX, focusY, renderState);
@@ -1204,6 +1243,14 @@ function getPrincipleFocusX(p, principle, renderWidth, renderState) {
       return renderWidth * 0.62;
     case GESTALT_PRINCIPLES.proportion.key:
       return renderWidth * 0.618;
+    case GESTALT_PRINCIPLES.variety.key:
+      return renderWidth * 0.26;
+    case GESTALT_PRINCIPLES.gradations.key:
+      return renderWidth * 0.76;
+    case GESTALT_PRINCIPLES.rhythm.key:
+      return renderWidth * 0.42;
+    case GESTALT_PRINCIPLES.pattern.key:
+      return renderWidth * 0.36;
     default:
       return renderWidth * p.lerp(0.32, 0.72, p.noise(renderWidth * 0.0004, renderState.chaos * 0.02));
   }
@@ -1220,6 +1267,14 @@ function getPrincipleFocusY(p, principle, renderHeight, renderState) {
       return renderHeight * 0.44;
     case GESTALT_PRINCIPLES.proportion.key:
       return renderHeight * 0.382;
+    case GESTALT_PRINCIPLES.unityHarmony.key:
+      return renderHeight * 0.5;
+    case GESTALT_PRINCIPLES.variety.key:
+      return renderHeight * 0.68;
+    case GESTALT_PRINCIPLES.gradations.key:
+      return renderHeight * 0.7;
+    case GESTALT_PRINCIPLES.rhythm.key:
+      return renderHeight * 0.58;
     default:
       return renderHeight * p.lerp(0.3, 0.7, p.noise(renderHeight * 0.0006, renderState.chaos * 0.03));
   }
@@ -1237,6 +1292,14 @@ function getPrincipleAxisPoint(p, principle, progress, band, renderWidth, render
       return { x: renderWidth * (0.12 + progress * 0.76), y: renderHeight * (0.18 + ((band * 8) % 1) * 0.64) };
     case GESTALT_PRINCIPLES.emphasis.key:
       return { x: p.lerp(renderWidth * 0.16, focusX, progress), y: p.lerp(renderHeight * (0.18 + band * 0.5), focusY, 0.35) };
+    case GESTALT_PRINCIPLES.unityHarmony.key:
+      return { x: renderWidth * (0.2 + progress * 0.6), y: renderHeight * (0.34 + band * 0.32) };
+    case GESTALT_PRINCIPLES.variety.key:
+      return { x: renderWidth * (0.08 + progress * (0.5 + p.noise(band * 9.1) * 0.42)), y: renderHeight * (0.12 + p.noise(band * 6.7, progress * 1.4) * 0.76) };
+    case GESTALT_PRINCIPLES.rhythm.key:
+      return { x: renderWidth * (0.1 + progress * 0.8), y: renderHeight * (0.22 + band * 0.56 + Math.sin(progress * Math.PI * 6) * 0.07) };
+    case GESTALT_PRINCIPLES.proportion.key:
+      return { x: renderWidth * (0.12 + progress * 0.506), y: renderHeight * (0.14 + band * 0.618 * 0.72) };
     default:
       return { x: renderWidth * (0.12 + progress * 0.76), y: renderHeight * (0.18 + band * 0.64) };
   }
@@ -1246,6 +1309,25 @@ function getPrinciplePlacement(p, principle, index, count, renderWidth, renderHe
   const progress = index / p.max(1, count - 1);
 
   switch (principle.key) {
+    case GESTALT_PRINCIPLES.unityHarmony.key: {
+      const columns = p.ceil(p.sqrt(count));
+      const cell = p.min(renderWidth, renderHeight) * 0.09;
+      const rows = p.ceil(count / columns);
+      return {
+        x: renderWidth * 0.5 + ((index % columns) - (columns - 1) / 2) * cell,
+        y: renderHeight * 0.5 + (p.floor(index / columns) - (rows - 1) / 2) * cell,
+      };
+    }
+    case GESTALT_PRINCIPLES.variety.key:
+      return {
+        x: p.random(marginX, renderWidth - marginX),
+        y: p.random(marginY, renderHeight - marginY),
+      };
+    case GESTALT_PRINCIPLES.gradations.key:
+      return {
+        x: p.lerp(marginX * 1.4, renderWidth - marginX * 1.4, progress),
+        y: p.lerp(renderHeight - marginY * 1.4, marginY * 1.4, progress * progress),
+      };
     case GESTALT_PRINCIPLES.balance.key:
       return {
         x: renderWidth * (index % 2 === 0 ? 0.34 : 0.66) + p.random(-renderWidth * 0.06, renderWidth * 0.06),
@@ -1287,12 +1369,21 @@ function getPrinciplePlacement(p, principle, index, count, renderWidth, renderHe
 function getPrincipleRotation(p, principle, progress, chaos) {
   switch (principle.key) {
     case GESTALT_PRINCIPLES.balance.key:
-    case GESTALT_PRINCIPLES.unityHarmony.key:
       return p.random(-0.08, 0.08) + chaos * 0.12;
+    case GESTALT_PRINCIPLES.unityHarmony.key:
+      return chaos * 0.04;
     case GESTALT_PRINCIPLES.movement.key:
       return -0.42 + progress * 0.84 + chaos * 0.18;
     case GESTALT_PRINCIPLES.variety.key:
       return p.random(-0.7, 0.7) * (0.7 + chaos * 0.4);
+    case GESTALT_PRINCIPLES.gradations.key:
+      return -0.6 + progress * 1.2;
+    case GESTALT_PRINCIPLES.rhythm.key:
+      return (Math.round(progress * 8) % 2 === 0 ? 0.35 : -0.35) + chaos * 0.1;
+    case GESTALT_PRINCIPLES.pattern.key:
+      return chaos * 0.05;
+    case GESTALT_PRINCIPLES.proportion.key:
+      return 0.618 * progress - 0.3;
     default:
       return p.random(-0.28, 0.28) + chaos * 0.22;
   }
@@ -1313,6 +1404,14 @@ function getTextureProgress(p, principle, column, row, columns, rows) {
       return (p.sin(x * p.TWO_PI * 4) + 1) * 0.5;
     case GESTALT_PRINCIPLES.emphasis.key:
       return 1 - p.constrain(p.dist(x, y, 0.68, 0.38) / 0.9, 0, 1);
+    case GESTALT_PRINCIPLES.unityHarmony.key:
+      return 0.55;
+    case GESTALT_PRINCIPLES.variety.key:
+      return p.random();
+    case GESTALT_PRINCIPLES.movement.key:
+      return (p.sin((x * 0.7 + y * 0.3) * p.TWO_PI * 1.5 - y * 2) + 1) * 0.5;
+    case GESTALT_PRINCIPLES.proportion.key:
+      return (x < 0.618 ? 0.35 : 0.85) * (y < 0.382 ? 0.6 : 1);
     default:
       return p.noise(column * 0.18, row * 0.18);
   }
@@ -1326,6 +1425,18 @@ function getValueAlpha(principle, progress) {
       return 1 - Math.abs(progress - 0.5) * 2;
     case GESTALT_PRINCIPLES.emphasis.key:
       return progress > 0.66 ? 1 : progress * 0.6;
+    case GESTALT_PRINCIPLES.unityHarmony.key:
+      return 0.6;
+    case GESTALT_PRINCIPLES.variety.key:
+      return 0.15 + Math.abs(Math.sin(progress * 91.7)) * 0.85;
+    case GESTALT_PRINCIPLES.rhythm.key:
+      return (Math.sin(progress * Math.PI * 6) + 1) * 0.5;
+    case GESTALT_PRINCIPLES.movement.key:
+      return progress * progress;
+    case GESTALT_PRINCIPLES.pattern.key:
+      return Math.round(progress * 12) % 2 === 0 ? 0.9 : 0.2;
+    case GESTALT_PRINCIPLES.proportion.key:
+      return progress < 0.382 ? 0.25 : progress < 0.618 ? 0.6 : 1;
     default:
       return 0.35 + progress * 0.65;
   }
