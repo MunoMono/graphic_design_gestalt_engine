@@ -1,4 +1,4 @@
-import { Accordion, AccordionItem, Tag, Toggle } from "@carbon/react";
+import { Accordion, AccordionItem, Select, SelectItem, Tag, Toggle } from "@carbon/react";
 import { GESTALT_CONTROL_SECTIONS } from "../engine/constants";
 import GestaltSliderGroup from "./GestaltSliderGroup";
 
@@ -24,6 +24,19 @@ export default function PrinciplesAccordion({ values, selectedKey, onControlChan
                 />
                 {itemValues.active ? <Tag type="green">Added</Tag> : <Tag type="cool-gray">Inactive</Tag>}
               </div>
+              {item.modeOptions ? (
+                <Select
+                  id={`principle-mode-${item.key}`}
+                  labelText={`${item.title} Mode`}
+                  value={itemValues.mode}
+                  disabled={disabled || !itemValues.active}
+                  onChange={(event) => onControlChange(item.key, { mode: event.target.value })}
+                >
+                  {item.modeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value} text={option.label} />
+                  ))}
+                </Select>
+              ) : null}
               <GestaltSliderGroup
                 prefix={`principle-${item.key}`}
                 values={itemValues}

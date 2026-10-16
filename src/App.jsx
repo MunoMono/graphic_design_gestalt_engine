@@ -36,6 +36,11 @@ function buildSandboxStateSnapshot(state) {
     process: state.process,
     processIntensity: state.processIntensity,
     processScale: state.processScale,
+    sizeHierarchy: state.sizeHierarchy,
+    contrastHierarchy: state.contrastHierarchy,
+    alignmentMode: state.alignmentMode,
+    alignmentHierarchy: state.alignmentHierarchy,
+    proximityHierarchy: state.proximityHierarchy,
     seed: state.seed,
     gestaltControls: state.gestaltControls,
   };
@@ -239,6 +244,11 @@ export default function App() {
   async function handleProcessScaleChange(value) {
     setBatchCandidates([]);
     await applyState({ processScale: value });
+  }
+
+  async function handleHierarchyChange(patch) {
+    setBatchCandidates([]);
+    await applyState(patch);
   }
 
   async function handleGestaltControlChange(section, key, patch) {
@@ -469,6 +479,7 @@ export default function App() {
               onProcessChange={handleProcessChange}
               onProcessIntensityChange={handleProcessIntensityChange}
               onProcessScaleChange={handleProcessScaleChange}
+              onHierarchyChange={handleHierarchyChange}
               onElementChange={handleElementChange}
               onPrincipleChange={handlePrincipleChange}
               onElementControlChange={(key, patch) => handleGestaltControlChange("elements", key, patch)}

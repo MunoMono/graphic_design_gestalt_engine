@@ -1,6 +1,7 @@
 import { Accordion, AccordionItem, Button, Select, SelectItem, Slider, Tag, Tile } from "@carbon/react";
 import { PROCESS_OPTIONS } from "../engine/constants";
 import ElementsAccordion from "./ElementsAccordion";
+import HierarchyControls from "./HierarchyControls";
 import PrinciplesAccordion from "./PrinciplesAccordion";
 import SeedControls from "./SeedControls";
 
@@ -14,6 +15,7 @@ export default function ControlPanel({
   onProcessChange,
   onProcessIntensityChange,
   onProcessScaleChange,
+  onHierarchyChange,
   onElementControlChange,
   onPrincipleControlChange,
   onClearCanvas,
@@ -114,26 +116,28 @@ export default function ControlPanel({
                   Generate Batch
                 </Button>
               </div>
+
+              <div className="panel-stack panel-stack--tight panel-section">
+                <div className="panel-heading panel-heading--compact">
+                  <p className="panel-eyebrow">Engine controls</p>
+                </div>
+
+                <Slider
+                  id="chaos-slider"
+                  labelText="Chaos"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={state.chaos}
+                  hideTextInput={false}
+                  onChange={({ value }) => onChaosChange(Number(value))}
+                />
+              </div>
+
+              <HierarchyControls state={state} onChange={onHierarchyChange} disabled={disabled} />
             </div>
           </AccordionItem>
         </Accordion>
-
-        <div className="panel-stack panel-stack--tight panel-section">
-          <div className="panel-heading panel-heading--compact">
-            <p className="panel-eyebrow">Engine controls</p>
-          </div>
-
-          <Slider
-            id="chaos-slider"
-            labelText="Chaos"
-            min={0}
-            max={100}
-            step={1}
-            value={state.chaos}
-            hideTextInput={false}
-            onChange={({ value }) => onChaosChange(Number(value))}
-          />
-        </div>
       </div>
     </Tile>
   );

@@ -38,6 +38,12 @@ export const PROCESS_OPTIONS = [
   { value: "stepQuantize", label: "Step Quantize", filenameSlug: "step-quantize" },
 ];
 
+export const ALIGNMENT_MODE_OPTIONS = [
+  { value: "grid", label: "Grid" },
+  { value: "thirds", label: "Rule of Thirds" },
+  { value: "golden", label: "Golden Section" },
+];
+
 export const EXPORT_FORMAT_OPTIONS = [
   { value: "wide", label: "16:9 Screen", filenameSlug: "16x9", width: 3840, height: 2160, hotkey: "1" },
   { value: "square", label: "1:1 Square", filenameSlug: "1x1", width: 2160, height: 2160, hotkey: "2" },
@@ -68,6 +74,11 @@ export const GESTALT_CONTROL_SECTIONS = {
     {
       key: "line",
       title: "Line",
+      modeOptions: [
+        { value: "mixed", label: "Mixed" },
+        { value: "actual", label: "Actual" },
+        { value: "implied", label: "Implied" },
+      ],
       description:
         "The edge of a shape or form or the direction followed by anything in motion. An implied line is a line that does not really exist, but appears to be present. An actual line is a line that is actually present.",
     },
@@ -80,6 +91,11 @@ export const GESTALT_CONTROL_SECTIONS = {
     {
       key: "shape",
       title: "Shape",
+      modeOptions: [
+        { value: "mixed", label: "Mixed" },
+        { value: "organic", label: "Organic" },
+        { value: "geometric", label: "Geometric" },
+      ],
       description:
         "Shape encloses a two-dimensional area. Shape can create most of the elements and many of the principles. Types of shapes include organic shapes with curved, continuous edges and geometric shapes with sharp edges and angles.",
     },
@@ -98,6 +114,11 @@ export const GESTALT_CONTROL_SECTIONS = {
     {
       key: "texture",
       title: "Texture",
+      modeOptions: [
+        { value: "mixed", label: "Mixed" },
+        { value: "implied", label: "Implied" },
+        { value: "actual", label: "Actual" },
+      ],
       description:
         "Texture is a quality related closely to our sense of touch. It can create emphasis, movement, pattern, and emotion. Implied texture appears to be present but is an illusion. Actual texture really exists and can be felt.",
     },
@@ -130,6 +151,11 @@ export const GESTALT_CONTROL_SECTIONS = {
     {
       key: "balance",
       title: "Balance",
+      modeOptions: [
+        { value: "symmetrical", label: "Symmetrical" },
+        { value: "asymmetrical", label: "Asymmetrical" },
+        { value: "radial", label: "Radial" },
+      ],
       description:
         "Balance refers to the equalisation of elements in a work. Balance can be symmetrical, asymmetrical, or radial from the centre outward.",
     },
@@ -148,6 +174,10 @@ export const GESTALT_CONTROL_SECTIONS = {
     {
       key: "rhythm",
       title: "Rhythm",
+      modeOptions: [
+        { value: "regular", label: "Regular" },
+        { value: "irregular", label: "Irregular" },
+      ],
       description:
         "Rhythm creates movement through repeated objects or visual beats. Rhythm can be regular or irregular.",
     },
@@ -174,17 +204,32 @@ export const DEFAULT_GESTALT_CONTROL_VALUES = {
   thickness: 50,
   scale: 50,
   angle: 0,
+  mode: "mixed",
   active: false,
+};
+
+export const DEFAULT_HIERARCHY_STATE = {
+  sizeHierarchy: 50,
+  contrastHierarchy: 50,
+  alignmentMode: "grid",
+  alignmentHierarchy: 50,
+  proximityHierarchy: 50,
 };
 
 export function createDefaultGestaltControls() {
   return {
     elements: GESTALT_CONTROL_SECTIONS.elements.reduce((accumulator, item) => {
-      accumulator[item.key] = { ...DEFAULT_GESTALT_CONTROL_VALUES };
+      accumulator[item.key] = {
+        ...DEFAULT_GESTALT_CONTROL_VALUES,
+        mode: item.modeOptions?.[0]?.value ?? DEFAULT_GESTALT_CONTROL_VALUES.mode,
+      };
       return accumulator;
     }, {}),
     principles: GESTALT_CONTROL_SECTIONS.principles.reduce((accumulator, item) => {
-      accumulator[item.key] = { ...DEFAULT_GESTALT_CONTROL_VALUES };
+      accumulator[item.key] = {
+        ...DEFAULT_GESTALT_CONTROL_VALUES,
+        mode: item.modeOptions?.[0]?.value ?? DEFAULT_GESTALT_CONTROL_VALUES.mode,
+      };
       return accumulator;
     }, {}),
   };
@@ -212,6 +257,7 @@ export const DEFAULT_MACHINE_STATE = {
   process: "clean",
   processIntensity: 50,
   processScale: 50,
+  ...DEFAULT_HIERARCHY_STATE,
   seed: 20270709,
   activated: false,
   format: "wide",

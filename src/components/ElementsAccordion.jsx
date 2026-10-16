@@ -28,6 +28,20 @@ export default function ElementsAccordion({ values, selectedKey, onControlChange
                 {itemValues.active ? <Tag type="green">Added</Tag> : <Tag type="cool-gray">Inactive</Tag>}
               </div>
 
+              {item.modeOptions ? (
+                <Select
+                  id={`element-mode-${item.key}`}
+                  labelText={`${item.title} Mode`}
+                  value={itemValues.mode}
+                  disabled={disabled || !itemValues.active}
+                  onChange={(event) => onControlChange(item.key, { mode: event.target.value })}
+                >
+                  {item.modeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value} text={option.label} />
+                  ))}
+                </Select>
+              ) : null}
+
               {item.key === "colour" ? (
                 <>
                   <p className="panel-note">Choose a palette and adjust hue, saturation, and brightness for the active colour study.</p>

@@ -43,7 +43,7 @@ export default function BackgroundPicker({ color, opacity, onChange, disabled })
   const rgb = hexToRgb(color);
   return (
     <fieldset className="background-picker" disabled={disabled}>
-      <legend>Background</legend>
+      <legend>Surface</legend>
       <div
         className="background-picker__plane"
         style={{ backgroundColor: `hsl(${hsv.hue} 100% 50%)` }}
