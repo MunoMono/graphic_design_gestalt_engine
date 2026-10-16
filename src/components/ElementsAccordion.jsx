@@ -1,9 +1,10 @@
 import { Accordion, AccordionItem, Select, SelectItem, Slider, Tag, Toggle } from "@carbon/react";
 import { COLOUR_PRESET_OPTIONS } from "../engine/colourPresets";
 import { GESTALT_CONTROL_SECTIONS } from "../engine/constants";
+import BackgroundPicker from "./BackgroundPicker";
 import GestaltSliderGroup from "./GestaltSliderGroup";
 
-export default function ElementsAccordion({ values, selectedKey, onControlChange, onToggleChange, colourState, onColourChange, disabled }) {
+export default function ElementsAccordion({ values, selectedKey, onControlChange, onToggleChange, colourState, onColourChange, onBackgroundChange, disabled }) {
   return (
     <Accordion align="start" className="gestalt-accordion gestalt-accordion--nested">
       {GESTALT_CONTROL_SECTIONS.elements.map((item) => {
@@ -54,6 +55,9 @@ export default function ElementsAccordion({ values, selectedKey, onControlChange
                       onChange={({ value }) => onColourChange({ [key]: Number(value) })}
                     />
                   ))}
+
+                  <p className="panel-note">Set the background surface underneath the current colour study.</p>
+                  <BackgroundPicker color={colourState.backgroundColor} opacity={colourState.backgroundOpacity} onChange={onBackgroundChange} disabled={disabled || !itemValues.active} />
                 </>
               ) : (
                 <GestaltSliderGroup

@@ -1,6 +1,5 @@
 import { Accordion, AccordionItem, Button, Select, SelectItem, Slider, Tag, Tile } from "@carbon/react";
 import { PROCESS_OPTIONS } from "../engine/constants";
-import BackgroundPicker from "./BackgroundPicker";
 import ElementsAccordion from "./ElementsAccordion";
 import PrinciplesAccordion from "./PrinciplesAccordion";
 import SeedControls from "./SeedControls";
@@ -53,6 +52,7 @@ export default function ControlPanel({
                 selectedKey={state.element}
                 colourState={state}
                 disabled={disabled}
+                onBackgroundChange={onBackgroundChange}
                 onColourChange={onColourChange}
                 onToggleChange={(key, active) => onElementControlChange(key, { active })}
                 onControlChange={onElementControlChange}
@@ -120,7 +120,7 @@ export default function ControlPanel({
 
         <div className="panel-stack panel-stack--tight panel-section">
           <div className="panel-heading panel-heading--compact">
-            <p className="panel-eyebrow">Engine and background controls</p>
+            <p className="panel-eyebrow">Engine controls</p>
           </div>
 
           <Slider
@@ -133,8 +133,6 @@ export default function ControlPanel({
             hideTextInput={false}
             onChange={({ value }) => onChaosChange(Number(value))}
           />
-
-          <BackgroundPicker color={state.backgroundColor} opacity={state.backgroundOpacity} onChange={onBackgroundChange} disabled={disabled} />
         </div>
       </div>
     </Tile>
