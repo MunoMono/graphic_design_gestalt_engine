@@ -16,8 +16,7 @@ The canvas may scale to fit your screen, but exports still render at the active 
 - `Principle` is the organising behaviour: balance, rhythm, emphasis, pattern, and so on.
 - `Chaos` controls how ordered or disrupted the result feels.
 - `Proof` switches the backdrop between `White` and `Black` review grounds.
-- `Type Proof` overlays simple placeholder typography for layout checking.
-- `Type Layout` switches that proof between `Left` and `Centre`.
+- `Process` applies a post-generation treatment such as halftone, dither, bitmap, or scanline distortion.
 
 The pilot opens in `Blank View` by default. That means the proof background is visible, but artwork does not appear until you actively change `Element`, `Principle`, or `Chaos`, or generate a batch.
 
@@ -42,16 +41,6 @@ Use `Generate Batch` or press `B` to create a 12-image contact sheet for the cur
 
 This is the fastest way to shortlist directions while keeping the visual rules fixed.
 
-## Type and Proof Checking
-
-- Press `Y` to toggle Type Proof.
-- Use the `Type Layout` control to compare `Left` and `Centre` placements.
-- Press `G` to show or hide the grid guide.
-- Press `T` to show or hide the title-safe guide.
-- Press `H` to hide or show the overlay text.
-
-These are review aids only. They do not change the seed.
-
 ## Formats
 
 Use the keyboard to switch output format:
@@ -71,7 +60,6 @@ PNG export names now include:
 - the active `Principle`
 - the `Chaos` value
 - the proof mode
-- `type-proof` when type proof is visible
 - the literal word `seed`
 - the seed number
 - the canvas size
@@ -79,8 +67,6 @@ PNG export names now include:
 Example structure:
 
 `rca-biennale-gestalt-line-balance-chaos-30-white-seed-20270709-3840x2160.png`
-
-If Type Proof is on, treat that export as a proof image rather than a pure artwork file.
 
 ## Recommended Workflow
 
@@ -90,7 +76,7 @@ If Type Proof is on, treat that export as a proof image rather than a pure artwo
 4. Use `Generate Batch` to review a spread of seeds.
 5. Load a strong candidate back into the main canvas.
 6. Check `White` and `Black` proof backgrounds if needed.
-7. Toggle Type Proof if the backdrop needs to carry event text.
+7. Refine `Process`, `Colour`, and active element sliders until the hierarchy feels right.
 8. Export the chosen PNG.
 9. Log the result in `APPROVED_SEEDS.md`.
 

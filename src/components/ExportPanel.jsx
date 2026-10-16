@@ -133,7 +133,6 @@ export default function ExportPanel({
           <Tag type="blue">Background {getBackgroundLabel(state)}</Tag>
           <Tag type={state.process === "clean" ? "gray" : "purple"}>{processLabel}</Tag>
           {state.process !== "clean" ? <Tag type="purple">I {state.processIntensity} / S {state.processScale}</Tag> : null}
-          <Tag type={state.typeProof ? "green" : "gray"}>{state.typeProof ? `Type ${state.typeLayout}` : "Type Off"}</Tag>
         </div>
 
         <Button kind="primary" onClick={onExport} disabled={disabled}>

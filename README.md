@@ -65,8 +65,6 @@ Process Scale controls whether the treatment feels finer or coarser, smaller or 
 The export system supports:
 
 - full-colour backgrounds with HEX/RGB input, hue/saturation/brightness controls, swatches, and opacity
-- Type Proof on/off
-- Type Layout left/centre
 - deterministic seeds
 - batch candidate generation
 - export size presets

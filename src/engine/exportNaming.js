@@ -1,4 +1,4 @@
-import { getActiveGestaltItems, PROCESS_OPTIONS } from "./constants";
+import { getActiveGestaltItems, getActiveRenderableElementItems, PROCESS_OPTIONS } from "./constants";
 import { getExportFormatDefinition, getExportMetrics } from "./exportSizing";
 import { getBackgroundFilenameSegment } from "./background";
 import { COLOUR_PRESETS, isDefaultColourState, normalizeColourState } from "./colourPresets";
@@ -12,8 +12,9 @@ export function buildExportFilename(state, options = {}) {
   const { includeExtension = false } = options;
   const formatDefinition = getExportFormatDefinition(state.format);
   const exportMetrics = getExportMetrics(state);
-  const activeElements = getActiveGestaltItems(state.gestaltControls, "elements");
+  const activeElements = getActiveRenderableElementItems(state.gestaltControls);
   const activePrinciples = getActiveGestaltItems(state.gestaltControls, "principles");
+  const colourActive = Boolean(state.gestaltControls?.elements?.colour?.active);
   const buildCountLabel = (count, singular, plural) => `${count}-${count === 1 ? singular : plural}`;
   const subjectSegment = activeElements.length === 0
     ? "blank"
@@ -30,10 +31,9 @@ export function buildExportFilename(state, options = {}) {
     ? `-${PROCESS_FILENAME_SEGMENTS[state.process] ?? state.process}-intensity-${state.processIntensity}-scale-${state.processScale}`
     : "";
   const colour = normalizeColourState(state);
-  const colourSegment = isDefaultColourState(colour)
+  const colourSegment = !colourActive || isDefaultColourState(colour)
     ? ""
     : `-${COLOUR_PRESETS[colour.colourPreset].filenameSlug}${colour.colourHue || colour.colourSaturation !== 100 || colour.colourBrightness ? `-hue-${colour.colourHue}-sat-${colour.colourSaturation}-bri-${colour.colourBrightness}` : ""}`;
-  const typeProofSegment = state.typeProof ? "-type-proof" : "";
-  const baseName = `rca-biennale-${subjectSegment}-${getBackgroundFilenameSegment(state)}${colourSegment}${processSegment}${typeProofSegment}-${formatDefinition.filenameSlug}-${exportMetrics.scale}x-seed-${state.seed}-${exportMetrics.finalWidth}x${exportMetrics.finalHeight}`;
+  const baseName = `rca-biennale-${subjectSegment}-${getBackgroundFilenameSegment(state)}${colourSegment}${processSegment}-${formatDefinition.filenameSlug}-${exportMetrics.scale}x-seed-${state.seed}-${exportMetrics.finalWidth}x${exportMetrics.finalHeight}`;
   return includeExtension ? `${baseName}.png` : baseName;
 }

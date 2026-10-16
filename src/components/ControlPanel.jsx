@@ -1,11 +1,9 @@
 import { Accordion, AccordionItem, Button, Select, SelectItem, Slider, Tag, Tile } from "@carbon/react";
 import { PROCESS_OPTIONS } from "../engine/constants";
-import { COLOUR_PRESET_OPTIONS } from "../engine/colourPresets";
 import BackgroundPicker from "./BackgroundPicker";
 import ElementsAccordion from "./ElementsAccordion";
 import PrinciplesAccordion from "./PrinciplesAccordion";
 import SeedControls from "./SeedControls";
-import TypeProofControls from "./TypeProofControls";
 
 export default function ControlPanel({
   state,
@@ -20,15 +18,12 @@ export default function ControlPanel({
   onElementControlChange,
   onPrincipleControlChange,
   onClearCanvas,
-  onTypeProofChange,
-  onTypeLayoutChange,
   onSeedInputChange,
   onLoadSeed,
   onGenerateBatch,
   onRegenerateSeed,
   disabled,
 }) {
-  const colourControlsDisabled = disabled || state.colourPreset === "mono";
   const processControlsDisabled = disabled || state.process === "clean";
 
   return (
@@ -56,7 +51,9 @@ export default function ControlPanel({
               <ElementsAccordion
                 values={state.gestaltControls.elements}
                 selectedKey={state.element}
+                colourState={state}
                 disabled={disabled}
+                onColourChange={onColourChange}
                 onToggleChange={(key, active) => onElementControlChange(key, { active })}
                 onControlChange={onElementControlChange}
               />
@@ -75,11 +72,55 @@ export default function ControlPanel({
               />
             </div>
           </AccordionItem>
+
+          <AccordionItem title="Process">
+            <div className="accordion-group">
+              <p className="panel-eyebrow">Apply output treatment after the base composition is generated</p>
+
+              <Select id="process-select" labelText="Process" value={state.process} onChange={(event) => onProcessChange(event.target.value)}>
+                {PROCESS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value} text={option.label} />
+                ))}
+              </Select>
+
+              <Slider
+                id="process-intensity-slider"
+                labelText="Process Intensity"
+                min={0}
+                max={100}
+                step={1}
+                value={state.processIntensity}
+                hideTextInput={false}
+                disabled={processControlsDisabled}
+                onChange={({ value }) => onProcessIntensityChange(Number(value))}
+              />
+
+              <Slider
+                id="process-scale-slider"
+                labelText="Process Scale"
+                min={0}
+                max={100}
+                step={1}
+                value={state.processScale}
+                hideTextInput={false}
+                disabled={processControlsDisabled}
+                onChange={({ value }) => onProcessScaleChange(Number(value))}
+              />
+
+              <SeedControls value={seedInput} onChange={onSeedInputChange} onLoad={onLoadSeed} onRegenerate={onRegenerateSeed} disabled={disabled} />
+
+              <div className="panel-actions">
+                <Button kind="secondary" onClick={onGenerateBatch} disabled={disabled}>
+                  Generate Batch
+                </Button>
+              </div>
+            </div>
+          </AccordionItem>
         </Accordion>
 
         <div className="panel-stack panel-stack--tight panel-section">
           <div className="panel-heading panel-heading--compact">
-            <p className="panel-eyebrow">Engine, background and colour controls</p>
+            <p className="panel-eyebrow">Engine and background controls</p>
           </div>
 
           <Slider
@@ -94,76 +135,6 @@ export default function ControlPanel({
           />
 
           <BackgroundPicker color={state.backgroundColor} opacity={state.backgroundOpacity} onChange={onBackgroundChange} disabled={disabled} />
-
-          <Select id="colour-select" labelText="Colour" value={state.colourPreset} onChange={(event) => onColourChange({ colourPreset: event.target.value })}>
-            {COLOUR_PRESET_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value} text={option.label} />
-            ))}
-          </Select>
-
-          {[
-            { key: "colourHue", label: "Colour Hue Shift", min: -180, max: 180 },
-            { key: "colourSaturation", label: "Colour Saturation", min: 0, max: 200 },
-            { key: "colourBrightness", label: "Colour Brightness", min: -100, max: 100 },
-          ].map(({ key, label, min, max }) => (
-            <Slider
-              key={key}
-              id={`${key}-slider`}
-              labelText={label}
-              min={min}
-              max={max}
-              step={1}
-              value={state[key]}
-              hideTextInput={false}
-              disabled={colourControlsDisabled}
-              onChange={({ value }) => onColourChange({ [key]: Number(value) })}
-            />
-          ))}
-
-          <Select id="process-select" labelText="Process" value={state.process} onChange={(event) => onProcessChange(event.target.value)}>
-            {PROCESS_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value} text={option.label} />
-            ))}
-          </Select>
-
-          <Slider
-            id="process-intensity-slider"
-            labelText="Process Intensity"
-            min={0}
-            max={100}
-            step={1}
-            value={state.processIntensity}
-            hideTextInput={false}
-            disabled={processControlsDisabled}
-            onChange={({ value }) => onProcessIntensityChange(Number(value))}
-          />
-
-          <Slider
-            id="process-scale-slider"
-            labelText="Process Scale"
-            min={0}
-            max={100}
-            step={1}
-            value={state.processScale}
-            hideTextInput={false}
-            disabled={processControlsDisabled}
-            onChange={({ value }) => onProcessScaleChange(Number(value))}
-          />
-        </div>
-
-        <TypeProofControls
-          typeProof={state.typeProof}
-          typeLayout={state.typeLayout}
-          onTypeProofChange={onTypeProofChange}
-          onTypeLayoutChange={onTypeLayoutChange}
-        />
-
-        <SeedControls value={seedInput} onChange={onSeedInputChange} onLoad={onLoadSeed} onRegenerate={onRegenerateSeed} disabled={disabled} />
-
-        <div className="panel-actions">
-          <Button kind="secondary" onClick={onGenerateBatch} disabled={disabled}>
-            Generate Batch
-          </Button>
         </div>
       </div>
     </Tile>

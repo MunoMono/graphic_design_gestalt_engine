@@ -6,7 +6,7 @@ import CanvasStage from "./components/CanvasStage";
 import ControlPanel from "./components/ControlPanel";
 import ExportPanel from "./components/ExportPanel";
 import SandboxPanel from "./components/SandboxPanel";
-import { DEFAULT_MACHINE_STATE, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGestaltControls, getActiveGestaltItems } from "./engine/constants";
+import { DEFAULT_MACHINE_STATE, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGestaltControls, getActiveGestaltItems, getActiveRenderableElementItems } from "./engine/constants";
 import { buildExportFilename } from "./engine/exportNaming";
 import { applyExportMetricsToState, getExportMetrics } from "./engine/exportSizing";
 import { createGestaltEngine, normalizeMachineState } from "./engine/gestaltEngine";
@@ -37,8 +37,6 @@ function buildSandboxStateSnapshot(state) {
     processIntensity: state.processIntensity,
     processScale: state.processScale,
     seed: state.seed,
-    typeProof: state.typeProof,
-    typeLayout: state.typeLayout,
     gestaltControls: state.gestaltControls,
   };
 }
@@ -48,7 +46,7 @@ function serializeSandboxState(state) {
 }
 
 function buildActiveSummary(state) {
-  const activeElements = getActiveGestaltItems(state.gestaltControls, "elements");
+  const activeElements = getActiveRenderableElementItems(state.gestaltControls);
   const activePrinciples = getActiveGestaltItems(state.gestaltControls, "principles");
 
   if (activeElements.length === 0) {
@@ -163,12 +161,6 @@ export default function App() {
         return;
       }
 
-      if (keyValue === "y") {
-        event.preventDefault();
-        await handleTypeProofChange(!engineState.typeProof);
-        return;
-      }
-
       if (event.key === "1") {
         event.preventDefault();
         await handleFormatChange("wide");
@@ -265,14 +257,6 @@ export default function App() {
         },
       },
     }));
-  }
-
-  async function handleTypeProofChange(value) {
-    await applyState({ typeProof: value });
-  }
-
-  async function handleTypeLayoutChange(value) {
-    await applyState({ typeLayout: value });
   }
 
   async function handleLoadSeed() {
@@ -489,8 +473,6 @@ export default function App() {
               onPrincipleChange={handlePrincipleChange}
               onElementControlChange={(key, patch) => handleGestaltControlChange("elements", key, patch)}
               onPrincipleControlChange={(key, patch) => handleGestaltControlChange("principles", key, patch)}
-              onTypeProofChange={handleTypeProofChange}
-              onTypeLayoutChange={handleTypeLayoutChange}
               onSeedInputChange={setSeedInput}
               onLoadSeed={handleLoadSeed}
               onGenerateBatch={handleGenerateBatch}

@@ -22,6 +22,7 @@ export function createSeededRandom(seed) {
 }
 
 export function buildDeterministicBatchSeeds(machineState, count) {
+  const colourActive = Boolean(machineState.gestaltControls?.elements?.colour?.active);
   const seedSource = JSON.stringify({
     element: machineState.element,
     principle: machineState.principle,
@@ -30,14 +31,12 @@ export function buildDeterministicBatchSeeds(machineState, count) {
     ...((machineState.backgroundColor && !["#f7f5ef", "#050607"].includes(machineState.backgroundColor)) || machineState.backgroundOpacity < 100
       ? { backgroundColor: machineState.backgroundColor, backgroundOpacity: machineState.backgroundOpacity }
       : {}),
-    ...(!isDefaultColourState(machineState)
+    ...(colourActive && !isDefaultColourState(machineState)
       ? { colourPreset: machineState.colourPreset, colourHue: machineState.colourHue, colourSaturation: machineState.colourSaturation, colourBrightness: machineState.colourBrightness }
       : {}),
     process: machineState.process,
     processIntensity: machineState.processIntensity,
     processScale: machineState.processScale,
-    typeProof: machineState.typeProof,
-    typeLayout: machineState.typeLayout,
     seed: machineState.seed,
     format: machineState.format,
     customWidth: machineState.customWidth,

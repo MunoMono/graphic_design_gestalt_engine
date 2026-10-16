@@ -3,6 +3,7 @@ export const ELEMENT_OPTIONS = [
   { value: "space", label: "Space" },
   { value: "shape", label: "Shape" },
   { value: "form", label: "Form" },
+  { value: "colour", label: "Colour" },
   { value: "texture", label: "Texture" },
   { value: "value", label: "Value" },
   { value: "typography", label: "Typography" },
@@ -35,11 +36,6 @@ export const PROCESS_OPTIONS = [
   { value: "tornMask", label: "Torn Mask", filenameSlug: "torn-mask" },
   { value: "chromaticOffset", label: "Chromatic Offset", filenameSlug: "chromatic-offset" },
   { value: "stepQuantize", label: "Step Quantize", filenameSlug: "step-quantize" },
-];
-
-export const TYPE_LAYOUT_OPTIONS = [
-  { value: "left", label: "Left" },
-  { value: "centre", label: "Centre" },
 ];
 
 export const EXPORT_FORMAT_OPTIONS = [
@@ -94,6 +90,12 @@ export const GESTALT_CONTROL_SECTIONS = {
         "Form encloses a volume or three-dimensional area. Light and dark value variations can create form. Space is used to emphasise form.",
     },
     {
+      key: "colour",
+      title: "Colour",
+      description:
+        "Colour is light reflected from a surface. It can create emphasis, harmony, emotion, unity, and movement through hue, value, and intensity relationships.",
+    },
+    {
       key: "texture",
       title: "Texture",
       description:
@@ -109,7 +111,7 @@ export const GESTALT_CONTROL_SECTIONS = {
       key: "typography",
       title: "Typography",
       description:
-        "Typography is one of the most important components of effective design. It controls how users see, read, and understand text. It includes scale, spacing, hierarchy, contrast, measure, alignment, and rhythm.",
+        "Typography controls how users see, read, and understand text. It includes scale, spacing, hierarchy, contrast, alignment, rhythm, and proximity.",
     },
   ],
   principles: [
@@ -129,19 +131,19 @@ export const GESTALT_CONTROL_SECTIONS = {
       key: "balance",
       title: "Balance",
       description:
-        "Balance refers to the equalisation of elements in a work. Balance can be symmetrical, asymmetrical, or radial.",
+        "Balance refers to the equalisation of elements in a work. Balance can be symmetrical, asymmetrical, or radial from the centre outward.",
     },
     {
       key: "gradations",
       title: "Gradations",
       description:
-        "Gradation combines elements through gradual change. Examples include gradual changes from small to large, dark to light, sparse to dense, or shadow to highlight.",
+        "Gradation combines elements through gradual change, such as small to large, dark to light, sparse to dense, or shadow to highlight.",
     },
     {
       key: "emphasis",
       title: "Emphasis",
       description:
-        "Emphasis places greater attention on certain areas or objects. It can be created through sudden or abrupt changes in opposing elements.",
+        "Emphasis places greater attention on certain areas or objects through sudden or abrupt change, often using size, colour, and contrast.",
     },
     {
       key: "rhythm",
@@ -153,7 +155,7 @@ export const GESTALT_CONTROL_SECTIONS = {
       key: "movement",
       title: "Movement",
       description:
-        "Movement is the arrangement of parts to create a slow or fast action of the eye. Pattern, contrast, and line can create movement.",
+        "Movement is the arrangement of parts to create a slow-to-fast action of the eye. Pattern, contrast, and line can all create movement.",
     },
     {
       key: "pattern",
@@ -163,7 +165,7 @@ export const GESTALT_CONTROL_SECTIONS = {
     {
       key: "proportion",
       title: "Proportion",
-      description: "Proportion refers to the relationship of elements to the whole and to each other.",
+      description: "Proportion refers to the relationship of elements to the whole and to each other, shaping hierarchy through size, colour, contrast, alignment, and proximity.",
     },
   ],
 };
@@ -194,6 +196,10 @@ export function getActiveGestaltItems(gestaltControls, section) {
   return GESTALT_CONTROL_SECTIONS[section].filter((item) => Boolean(gestaltControls?.[section]?.[item.key]?.active));
 }
 
+export function getActiveRenderableElementItems(gestaltControls) {
+  return getActiveGestaltItems(gestaltControls, "elements").filter((item) => item.key !== "colour");
+}
+
 export const DEFAULT_MACHINE_STATE = {
   element: "line",
   principle: "balance",
@@ -206,8 +212,6 @@ export const DEFAULT_MACHINE_STATE = {
   process: "clean",
   processIntensity: 50,
   processScale: 50,
-  typeProof: false,
-  typeLayout: "left",
   seed: 20270709,
   activated: false,
   format: "wide",

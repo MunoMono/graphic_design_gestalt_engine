@@ -14,8 +14,7 @@ The active machine state is:
 - `Principle`
 - `Chaos`
 - `Proof`
-- `Type Proof`
-- `Type Layout`
+- `Process`
 - `Seed`
 - `Format`
 
@@ -71,22 +70,13 @@ The background picker supports the full RGB colour range with a saturation/brigh
 
 Artwork uses light or dark ink according to background brightness. Background opacity does not fade the artwork. Transparent PNGs preserve alpha; the preview checkerboard is never exported. Original white and black backgrounds remain available as swatches.
 
-## Type Proof
-
-Type Proof is still a review overlay only.
-
-- `Off` means artwork-only review
-- `Left` and `Centre` are layout probes for placeholder event typography
-
-If Type Proof is visible during export, treat the output as a proof asset, not a final clean artwork render.
-
 ## Reproducibility
 
 The seed remains the canonical recall mechanism.
 
 - use positive integer seeds only
 - keep `randomSeed(...)` and `noiseSeed(...)` aligned to the same seed
-- changing `Element`, `Principle`, `Chaos`, `Proof`, or `Type Proof` should redraw the same seed, not replace it
+- changing `Element`, `Principle`, `Chaos`, `Proof`, `Process`, or `Colour` should redraw the same seed, not replace it
 
 ## Formats
 
@@ -107,7 +97,6 @@ Exports must retain enough state to be reviewable and reproducible.
 - filenames must include the active `Principle`
 - filenames must include the `Chaos` value
 - filenames must include the proof mode
-- filenames must include `type-proof` when active
 - filenames must include the literal word `seed`
 - filenames must include the seed value
 - filenames must include the canvas size
