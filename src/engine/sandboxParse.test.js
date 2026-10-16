@@ -14,8 +14,8 @@ test("missing comma after an edited value is repaired", () => {
 });
 
 test("trailing commas, comments, unquoted keys and single quotes are repaired", () => {
-  const source = "{\n  // tweak\n  chaos: 40,\n  'colourPreset': 'acidHouse',\n  \"backgroundColor\": \"#ff00aa\", /* hex */\n}";
-  assert.deepEqual(parseSandboxCode(source).value, { chaos: 40, colourPreset: "acidHouse", backgroundColor: "#ff00aa" });
+  const source = "{\n  // tweak\n  chaos: 40,\n  'colourPreset': 'waldi',\n  \"backgroundColor\": \"#ff00aa\", /* hex */\n}";
+  assert.deepEqual(parseSandboxCode(source).value, { chaos: 40, colourPreset: "waldi", backgroundColor: "#ff00aa" });
 });
 
 test("unrecoverable input reports the offending line", () => {
