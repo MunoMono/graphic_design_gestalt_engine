@@ -176,13 +176,25 @@ body {
 }
 
 .panel-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: 0.75rem;
+  align-items: stretch;
+}
+
+.panel-actions > .cds--btn,
+.panel-actions > .cds--btn-set,
+.panel-actions > .cds--file-browse-btn {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.panel-actions--split {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .panel-actions--split > * {
-  flex: 1 1 10rem;
+  min-inline-size: 0;
 }
 
 .panel-section {
@@ -424,6 +436,23 @@ body {
   min-height: 0;
 }
 
+.app-panel .cds--btn {
+  min-block-size: 3rem;
+}
+
+.app-panel .cds--btn__text {
+  white-space: nowrap;
+}
+
+.app-panel .cds--form-item,
+.app-panel .cds--select,
+.app-panel .cds--select-input,
+.app-panel .cds--text-input,
+.app-panel .cds--text-area {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
 .cds--header__global {
   flex: 0 0 auto;
 }
@@ -642,7 +671,7 @@ body {
   }
 
   .panel-actions--split > * {
-    flex: 1 1 100%;
+    inline-size: 100%;
   }
 
   .export-grid--two-up {
