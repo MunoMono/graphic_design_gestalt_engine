@@ -50,6 +50,11 @@ function serializeSandboxState(state) {
   return JSON.stringify(buildSandboxStateSnapshot(state), null, 2);
 }
 
+function buildSandboxDownloadName(state) {
+  const baseName = buildExportFilename(state, { includeExtension: false });
+  return `${baseName}-state.json`;
+}
+
 function buildActiveSummary(state) {
   const activeElements = getActiveRenderableElementItems(state.gestaltControls);
   const activePrinciples = getActiveGestaltItems(state.gestaltControls, "principles");
@@ -392,35 +397,41 @@ export default function App() {
     setSandboxCode(value);
   }
 
+  function applySandboxSource(source, successStatus) {
+    const { value: parsedConfig, repaired } = parseSandboxCode(source);
+
+    if (!parsedConfig || typeof parsedConfig !== "object" || Array.isArray(parsedConfig)) {
+      throw new Error("Sandbox input must be a JSON object.");
+    }
+
+    const nextState = hydrateMachineState({
+      ...engineState,
+      ...parsedConfig,
+      ...(parsedConfig.proof && parsedConfig.backgroundColor === undefined
+        ? { backgroundColor: undefined }
+        : {}),
+      gestaltControls: parsedConfig.gestaltControls ?? engineState.gestaltControls,
+    });
+
+    setBatchCandidates([]);
+    setEngineState(nextState);
+    setSandboxCode(serializeSandboxState(nextState));
+    setSandboxDirty(false);
+    setSandboxStatus({
+      ...successStatus,
+      subtitle: repaired ? successStatus.repairedSubtitle : successStatus.subtitle,
+    });
+  }
+
   async function handleSandboxApply() {
     setError("");
 
     try {
-      const { value: parsedConfig, repaired } = parseSandboxCode(sandboxCode);
-
-      if (!parsedConfig || typeof parsedConfig !== "object" || Array.isArray(parsedConfig)) {
-        throw new Error("Sandbox input must be a JSON object.");
-      }
-
-      const nextState = hydrateMachineState({
-        ...engineState,
-        ...parsedConfig,
-        ...(parsedConfig.proof && parsedConfig.backgroundColor === undefined
-          ? { backgroundColor: undefined }
-          : {}),
-        gestaltControls: parsedConfig.gestaltControls ?? engineState.gestaltControls,
-      });
-
-      setBatchCandidates([]);
-      setEngineState(nextState);
-      setSandboxCode(serializeSandboxState(nextState));
-      setSandboxDirty(false);
-      setSandboxStatus({
+      applySandboxSource(sandboxCode, {
         kind: "success",
         title: "Code applied",
-        subtitle: repaired
-          ? "Small JSON slips (missing or trailing commas, comments, unquoted keys) were fixed and the composition was updated."
-          : "The composition state was updated from the sandbox JSON.",
+        subtitle: "The composition state was updated from the sandbox JSON.",
+        repairedSubtitle: "Small JSON slips (missing or trailing commas, comments, unquoted keys) were fixed and the composition was updated.",
       });
     } catch (nextError) {
       setSandboxStatus({
@@ -439,6 +450,60 @@ export default function App() {
       title: "Sandbox reset",
       subtitle: "The editor was restored from the current React machine state.",
     });
+  }
+
+  function handleSandboxDownload() {
+    setError("");
+
+    try {
+      const fileName = buildSandboxDownloadName(engineState);
+      const blob = new Blob([serializeSandboxState(engineState)], { type: "application/json" });
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+
+      setSandboxStatus({
+        kind: "success",
+        title: "Code downloaded",
+        subtitle: `Saved the current machine state as ${fileName}.`,
+      });
+    } catch (nextError) {
+      setSandboxStatus({
+        kind: "error",
+        title: "Download failed",
+        subtitle: nextError.message,
+      });
+    }
+  }
+
+  async function handleSandboxImport(file) {
+    if (!file) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      const source = await file.text();
+      applySandboxSource(source, {
+        kind: "success",
+        title: "Code imported",
+        subtitle: `Loaded ${file.name} and restored the composition state.`,
+        repairedSubtitle: `Loaded ${file.name}, repaired minor JSON issues, and restored the composition state.`,
+      });
+    } catch (nextError) {
+      setSandboxStatus({
+        kind: "error",
+        title: "Import failed",
+        subtitle: nextError.message,
+      });
+    }
   }
 
   async function handleClearCanvas() {
@@ -504,6 +569,8 @@ export default function App() {
               status={sandboxStatus}
               onCodeChange={handleSandboxCodeChange}
               onApply={handleSandboxApply}
+              onDownload={handleSandboxDownload}
+              onImport={handleSandboxImport}
               onReset={handleSandboxReset}
               disabled={!engineReady}
             />

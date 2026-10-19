@@ -1,6 +1,19 @@
+import { useRef } from "react";
 import { Button, InlineNotification, Tag, TextArea, Tile } from "@carbon/react";
 
-export default function SandboxPanel({ code, onCodeChange, onApply, onReset, status, disabled }) {
+export default function SandboxPanel({ code, onCodeChange, onApply, onReset, onDownload, onImport, status, disabled }) {
+  const importInputRef = useRef(null);
+
+  function handleImportButtonClick() {
+    importInputRef.current?.click();
+  }
+
+  async function handleImportChange(event) {
+    const [file] = event.target.files ?? [];
+    event.target.value = "";
+    await onImport?.(file);
+  }
+
   return (
     <Tile className="app-panel app-panel--sandbox">
       <div className="panel-heading panel-heading--row">
@@ -13,6 +26,14 @@ export default function SandboxPanel({ code, onCodeChange, onApply, onReset, sta
 
       <div className="panel-stack panel-stack--tight">
         <p className="panel-note">Edit the controlled config that drives the current composition, then apply it back into the React machine state.</p>
+
+        <input
+          ref={importInputRef}
+          type="file"
+          accept="application/json,.json,text/plain,.txt"
+          hidden
+          onChange={handleImportChange}
+        />
 
         <TextArea
           id="sandbox-code"
@@ -40,6 +61,15 @@ export default function SandboxPanel({ code, onCodeChange, onApply, onReset, sta
           </Button>
           <Button kind="secondary" onClick={onReset} disabled={disabled}>
             Reset Code
+          </Button>
+        </div>
+
+        <div className="panel-actions panel-actions--split">
+          <Button kind="tertiary" onClick={onDownload} disabled={disabled}>
+            Download Code
+          </Button>
+          <Button kind="tertiary" onClick={handleImportButtonClick} disabled={disabled}>
+            Import Code
           </Button>
         </div>
       </div>
