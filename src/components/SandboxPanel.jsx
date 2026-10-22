@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Button, InlineNotification, Tag, TextArea, Tile } from "@carbon/react";
+import { Button, InlineNotification, TextArea, Tile } from "@carbon/react";
 
 export default function SandboxPanel({ code, onCodeChange, onApply, onReset, onDownload, onImport, status, disabled }) {
   const importInputRef = useRef(null);
@@ -21,7 +21,6 @@ export default function SandboxPanel({ code, onCodeChange, onApply, onReset, onD
           <p className="panel-eyebrow">Live machine state sandbox</p>
           <h2>Sandbox</h2>
         </div>
-        <Tag type="purple">JSON</Tag>
       </div>
 
       <div className="panel-stack panel-stack--tight">

@@ -1,5 +1,5 @@
 import { Button, InlineNotification, Select, SelectItem, Tag, TextInput, Tile } from "@carbon/react";
-import { EXPORT_DPI_OPTIONS, EXPORT_FORMAT_OPTIONS, EXPORT_SCALE_OPTIONS, PROCESS_OPTIONS } from "../engine/constants";
+import { EXPORT_DPI_OPTIONS, EXPORT_SCALE_OPTIONS, PROCESS_OPTIONS } from "../engine/constants";
 import { formatPhysicalSize, getDpiSelectValue, getScaleSelectValue } from "../engine/exportSizing";
 import { getBackgroundLabel } from "../engine/background";
 
@@ -12,19 +12,15 @@ export default function ExportPanel({
   filename,
   state,
   metrics,
-  onFormatChange,
   onScaleChange,
   onDpiChange,
   onCustomDpiChange,
-  onCustomWidthChange,
-  onCustomHeightChange,
   onExport,
   disabled,
 }) {
   const processLabel = PROCESS_LABELS[state.process] ?? state.process;
   const dpiSelectValue = getDpiSelectValue(state.dpi, state.dpiMode);
   const scaleSelectValue = getScaleSelectValue(state.scale);
-  const showCustomDimensions = state.format === "custom";
   const showCustomDpi = dpiSelectValue === "custom";
 
   return (
@@ -35,12 +31,6 @@ export default function ExportPanel({
       </div>
 
       <div className="panel-stack panel-stack--tight">
-        <Select id="export-format-select" labelText="Format" value={state.format} onChange={(event) => onFormatChange(event.target.value)} disabled={disabled}>
-          {EXPORT_FORMAT_OPTIONS.map((format) => (
-            <SelectItem key={format.value} value={format.value} text={format.label} />
-          ))}
-        </Select>
-
         <div className="export-grid export-grid--two-up">
           <Select id="export-scale-select" labelText="Scale" value={scaleSelectValue} onChange={(event) => onScaleChange(event.target.value)} disabled={disabled}>
             {EXPORT_SCALE_OPTIONS.map((scaleOption) => (
@@ -54,25 +44,6 @@ export default function ExportPanel({
             ))}
           </Select>
         </div>
-
-        {showCustomDimensions ? (
-          <div className="export-grid export-grid--two-up">
-            <TextInput
-              id="custom-export-width"
-              labelText="Custom width (px)"
-              value={String(state.customWidth)}
-              onChange={(event) => onCustomWidthChange(event.target.value)}
-              disabled={disabled}
-            />
-            <TextInput
-              id="custom-export-height"
-              labelText="Custom height (px)"
-              value={String(state.customHeight)}
-              onChange={(event) => onCustomHeightChange(event.target.value)}
-              disabled={disabled}
-            />
-          </div>
-        ) : null}
 
         {showCustomDpi ? (
           <TextInput

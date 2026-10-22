@@ -560,7 +560,15 @@ export default function App() {
 
           <div className="app-shell__centre">
             {error ? <InlineNotification kind="error" lowContrast hideCloseButton title="Engine error" subtitle={error} /> : null}
-            <CanvasStage stageRef={stageRef} ready={engineReady} viewLabel={engineState.activated ? "Composition view" : "Blank view"} activated={engineState.activated} />
+            <CanvasStage
+              stageRef={stageRef}
+              state={engineState}
+              metrics={exportMetrics}
+              onFormatChange={handleFormatChange}
+              onCustomWidthChange={handleCustomWidthChange}
+              onCustomHeightChange={handleCustomHeightChange}
+              disabled={!engineReady}
+            />
           </div>
 
           <div className="app-shell__right">
@@ -578,12 +586,9 @@ export default function App() {
               filename={filenamePreview}
               state={engineState}
               metrics={exportMetrics}
-              onFormatChange={handleFormatChange}
               onScaleChange={handleScaleChange}
               onDpiChange={handleDpiChange}
               onCustomDpiChange={handleCustomDpiChange}
-              onCustomWidthChange={handleCustomWidthChange}
-              onCustomHeightChange={handleCustomHeightChange}
               onExport={handleExport}
               disabled={!engineReady}
             />

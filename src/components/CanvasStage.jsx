@@ -1,17 +1,51 @@
-import { Tag, Tile } from "@carbon/react";
+import { Select, SelectItem, TextInput, Tile } from "@carbon/react";
+import { EXPORT_FORMAT_OPTIONS } from "../engine/constants";
 
-export default function CanvasStage({ stageRef, ready, viewLabel, activated }) {
+export default function CanvasStage({
+  stageRef,
+  state,
+  metrics,
+  onFormatChange,
+  onCustomWidthChange,
+  onCustomHeightChange,
+  disabled,
+}) {
+  const showCustomDimensions = state.format === "custom";
+
   return (
     <Tile className="app-panel app-panel--stage">
-      <div className="stage-header">
-        <div>
-          <p className="panel-eyebrow">Live composition workspace</p>
-          <h2>Canvas</h2>
-        </div>
-        <div className="stage-header__tags">
-          <Tag type={activated ? "green" : "gray"}>{activated ? "Active" : "Blank"}</Tag>
-          <Tag type="cool-gray">{viewLabel}</Tag>
-          <Tag type={ready ? "blue" : "warm-gray"}>{ready ? "Ready" : "Loading"}</Tag>
+      <div className="stage-header stage-header--canvas">
+        <div className="stage-header__size-control">
+          <Select
+            id="canvas-format-select"
+            labelText="Canvas size"
+            value={state.format}
+            onChange={(event) => onFormatChange(event.target.value)}
+            disabled={disabled}
+          >
+            {EXPORT_FORMAT_OPTIONS.map((format) => (
+              <SelectItem key={format.value} value={format.value} text={format.label} />
+            ))}
+          </Select>
+          {showCustomDimensions ? (
+            <div className="canvas-size-grid">
+              <TextInput
+                id="canvas-custom-width"
+                labelText="Width (px)"
+                value={String(state.customWidth)}
+                onChange={(event) => onCustomWidthChange(event.target.value)}
+                disabled={disabled}
+              />
+              <TextInput
+                id="canvas-custom-height"
+                labelText="Height (px)"
+                value={String(state.customHeight)}
+                onChange={(event) => onCustomHeightChange(event.target.value)}
+                disabled={disabled}
+              />
+            </div>
+          ) : null}
+          <p className="stage-header__size-readout">{metrics.baseWidth}x{metrics.baseHeight}px</p>
         </div>
       </div>
       <div className="canvas-stage-frame">

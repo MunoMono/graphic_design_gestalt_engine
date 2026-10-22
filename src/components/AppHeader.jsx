@@ -1,6 +1,6 @@
 import { Moon, Sun } from "@carbon/icons-react";
-import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, Tag } from "@carbon/react";
-import { PRODUCT_CONTEXT, PRODUCT_NAME } from "../engine/constants";
+import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName } from "@carbon/react";
+import { PRODUCT_NAME } from "../engine/constants";
 
 export default function AppHeader({ theme, onToggleTheme }) {
   const isDarkTheme = theme === "g100";
@@ -12,7 +12,6 @@ export default function AppHeader({ theme, onToggleTheme }) {
           <span className="app-header-shell__name-roman">Graham Newman RCA PhD</span>{" "}
           <span className="app-header-shell__name-bold">graphic design gestalt engine</span>
         </HeaderName>
-        <Tag type="cool-gray">{PRODUCT_CONTEXT}</Tag>
       </div>
       <HeaderGlobalBar>
         <HeaderGlobalAction
@@ -22,7 +21,6 @@ export default function AppHeader({ theme, onToggleTheme }) {
         >
           {isDarkTheme ? <Sun size={20} /> : <Moon size={20} />}
         </HeaderGlobalAction>
-        <Tag type="cool-gray">Prototype</Tag>
       </HeaderGlobalBar>
     </Header>
   );
