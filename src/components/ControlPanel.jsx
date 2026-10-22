@@ -113,7 +113,7 @@ export default function ControlPanel({
 
               <div className="panel-actions">
                 <Button kind="secondary" onClick={onGenerateBatch} disabled={disabled}>
-                  Generate Batch
+                  Generate batch
                 </Button>
               </div>
 

@@ -12,10 +12,10 @@ export default function SeedControls({ value, onChange, onLoad, onRegenerate, di
       />
       <div className="panel-actions panel-actions--split">
         <Button kind="secondary" onClick={onLoad} disabled={disabled}>
-          Load Seed
+          Load seed
         </Button>
         <Button kind="ghost" onClick={onRegenerate} disabled={disabled}>
-          New Seed
+          New seed
         </Button>
       </div>
     </div>

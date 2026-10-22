@@ -56,19 +56,19 @@ export default function SandboxPanel({ code, onCodeChange, onApply, onReset, onD
 
         <div className="panel-actions panel-actions--split">
           <Button kind="primary" onClick={onApply} disabled={disabled}>
-            Apply Code
+            Apply code
           </Button>
           <Button kind="secondary" onClick={onReset} disabled={disabled}>
-            Reset Code
+            Reset code
           </Button>
         </div>
 
         <div className="panel-actions panel-actions--split">
           <Button kind="tertiary" onClick={onDownload} disabled={disabled}>
-            Download Code
+            Download code
           </Button>
           <Button kind="tertiary" onClick={handleImportButtonClick} disabled={disabled}>
-            Import Code
+            Import code
           </Button>
         </div>
       </div>
