@@ -3,6 +3,7 @@ import { EXPORT_DPI_OPTIONS, EXPORT_FORMAT_OPTIONS, EXPORT_SCALE_OPTIONS } from 
 export const SAFE_EXPORT_MAX_SIDE = 12000;
 export const SAFE_EXPORT_MAX_MEGAPIXELS = 100;
 export const DEFAULT_EXPORT_DPI = 150;
+const MILLIMETRES_PER_INCH = 25.4;
 const PREVIEW_MAX_LONG_SIDE = 3840;
 const PREVIEW_MIN_LONG_SIDE = 2160;
 
@@ -83,10 +84,8 @@ export function getExportMetrics(state) {
   const finalHeight = Math.round(baseHeight * scale);
   const { previewWidth, previewHeight } = computePreviewDimensions(baseWidth, baseHeight);
   const megaPixels = (finalWidth * finalHeight) / 1000000;
-  const widthInches = finalWidth / dpi;
-  const heightInches = finalHeight / dpi;
-  const widthFeet = widthInches / 12;
-  const heightFeet = heightInches / 12;
+  const widthMillimetres = (finalWidth / dpi) * MILLIMETRES_PER_INCH;
+  const heightMillimetres = (finalHeight / dpi) * MILLIMETRES_PER_INCH;
   const isLargeExport = finalWidth > SAFE_EXPORT_MAX_SIDE || finalHeight > SAFE_EXPORT_MAX_SIDE || megaPixels > SAFE_EXPORT_MAX_MEGAPIXELS;
 
   return {
@@ -106,10 +105,8 @@ export function getExportMetrics(state) {
     finalWidth,
     finalHeight,
     megaPixels,
-    widthInches,
-    heightInches,
-    widthFeet,
-    heightFeet,
+    widthMillimetres,
+    heightMillimetres,
     isLargeExport,
   };
 }
@@ -135,10 +132,5 @@ export function applyExportMetricsToState(state) {
 }
 
 export function formatPhysicalSize(metrics) {
-  const inchesLabel = `${metrics.widthInches.toFixed(1)} x ${metrics.heightInches.toFixed(1)} in`;
-  if (metrics.widthInches >= 24 || metrics.heightInches >= 24) {
-    return `${inchesLabel} (${metrics.widthFeet.toFixed(1)} x ${metrics.heightFeet.toFixed(1)} ft)`;
-  }
-
-  return inchesLabel;
+  return `${metrics.widthMillimetres.toFixed(1)} x ${metrics.heightMillimetres.toFixed(1)} mm`;
 }
