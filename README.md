@@ -1,144 +1,86 @@
-# Graham Newman RCA PhD graphic design gestalt engine
+# Graphic Design Gestalt Engine
 
-Live demo, once GitHub Pages is enabled:
-https://munomono.github.io/graphic_design_gestalt_engine/
+**An experimental instrument for making, testing and questioning graphic design's visual grammar.**
 
-## Overview
+[**Launch the engine ↗**](https://munomono.github.io/graphic_design_gestalt_engine/) · [**Source code**](https://github.com/MunoMono/graphic_design_gestalt_engine)
 
-This is a browser-based generative graphic design engine for producing reproducible visual studies from the elements and principles of visual language. It runs entirely in the browser and combines a React + Vite + IBM Carbon product shell with a deterministic p5.js canvas runtime.
+[![Creative Commons Attribution–ShareAlike 4.0 International](https://licensebuttons.net/l/by-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-## Concept
+## What is it?
 
-The core composition model is:
+What happens when the elements and principles of graphic design become variables rather than rules?
 
-Element × Principle × Chaos
+The **Graphic Design Gestalt Engine** is a browser-based generative instrument that turns the conventional vocabulary of visual language into a system for experimentation. Line, shape, space, form, texture, value and typography are combined with organising principles such as balance, rhythm, movement, pattern and proportion. A controlled measure of *chaos* introduces variation, tension and disruption.
 
-Elements:
+The governing proposition is simple:
 
-- Line
-- Space
-- Shape
-- Form
-- Texture
-- Value
-- Typography
+> **Element × Principle × Chaos**
 
-Principles:
+The results are not templates or imitations of established designers' styles. They are distinct graphic propositions generated from a shared set of conditions. The engine is intended both as a practical image-making tool and as a way to critically examine the assumptions built into graphic design's familiar rules.
 
-- Unity/Harmony
-- Variety
-- Balance
-- Gradations
-- Emphasis
-- Rhythm
-- Movement
-- Pattern
-- Proportion
+## Explore the engine
 
-Chaos controls the degree of order, variation, density, disruption, and intensity.
+**[Open the live application](https://munomono.github.io/graphic_design_gestalt_engine/)** — no installation or account required.
 
-## Process treatments
+1. **Activate elements.** Choose one or more visual building blocks and adjust their behaviour.
+2. **Activate principles.** Introduce one or more organising relationships, from balance and harmony to variety, rhythm and movement.
+3. **Change the conditions.** Adjust chaos, hierarchy, colour and background to test how the composition changes.
+4. **Apply a process.** Choose from treatments including halftone, diffusion dither, bitmap, scanline and chromatic offset.
+5. **Generate a batch.** Compare candidates, select a promising variation and refine it.
+6. **Export.** Download a PNG at your chosen format, scale and resolution.
 
-Available process modes:
+A composition is associated with a **seed**. Keep the same seed and settings to reproduce a result; change either to explore a new direction. This makes the process open to comparison, curation and iteration rather than relying on unrepeatable random output.
 
-- Clean
-- Halftone
-- Diffusion Dither
-- Coarse Bitmap
-- Phototype Slice
-- Scanline Screen
-- Torn Mask
-- Chromatic Offset
-- Step Quantize
+## What can it produce?
 
-The process system also includes:
+The engine supports screen, print and exhibition-scale work: 16:9, square and portrait formats; A0 portrait and landscape; six-foot banner presets; and custom dimensions. Export controls include scaling and DPI settings. Output filenames record the composition's parameters to help preserve its provenance.
 
-- Process Intensity
-- Process Scale
+The visual treatments and colour controls make it possible to create a family of related but non-identical images — useful for identity systems, communication design, teaching and speculative visual research.
 
-Process Intensity controls how strongly the selected treatment affects the composition.
+## Research context
 
-Process Scale controls whether the treatment feels finer or coarser, smaller or larger, tighter or bolder, depending on the selected process mode.
+The engine was developed by **Graham Newman (Muno Mono)** through doctoral research at the **Royal College of Art** and in exploring a generative visual language for the proposed **RCA PhD Biennale 2027** identity.
 
-## Export system
+Its starting point is a question, not a style: what becomes visible when the principles normally taught as the foundations of graphic design are made explicit, recombined and disrupted computationally? Rather than treating these principles as universal prescriptions for good design, the engine offers a means of testing their possibilities and limitations through making.
 
-The export system supports:
+This is an independent research and design project, not an official Royal College of Art software product or endorsed institutional identity.
 
-- full-colour backgrounds with HEX/RGB input, hue/saturation/brightness controls, swatches, and opacity
-- deterministic seeds
-- batch candidate generation
-- export size presets
-- export scale multipliers
-- PNG export
-- production filename generation
+## Run locally
 
-Exports are deterministic from the current seed and matrix state. Batch review remains preview-sized for performance, while PNG export renders at the chosen output size.
-
-The live canvas workspace fills the available viewport height and fits the selected format without stretching or cropping. Export formats and output dimensions are independent of the workspace's on-screen size.
-
-Background opacity affects only the background, not the artwork. Transparency is shown with a checkerboard (not included in PNG downloads). Sandbox JSON stores `backgroundColor` as a six-digit hex string and `backgroundOpacity` from 0 to 100; legacy `proof: "white"` / `"black"` states still load. Artwork contrast adapts to the background colour. Custom background colour and opacity are included in export filenames.
-
-## Technology stack
-
-- React
-- Vite
-- IBM Carbon Design System
-- p5.js / canvas runtime
-- Sass / SCSS
-
-## Local development
+The engine is built with **React, Vite, p5.js, IBM Carbon and Sass**. To run it locally, install Node.js and npm, then:
 
 ```bash
+git clone https://github.com/MunoMono/graphic_design_gestalt_engine.git
+cd graphic_design_gestalt_engine
 npm install
 npm run dev
 ```
 
-## Build
+For a production build:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## GitHub Pages deployment
+The application runs in the browser. Its core generative canvas is deterministic for a given configuration and seed.
 
-Pushing to `main` triggers the GitHub Actions workflow and deploys to:
+## Licence and reuse
 
-https://munomono.github.io/graphic_design_gestalt_engine/
+**© 2026 Graham Newman / Muno Mono.** The original materials in this repository, including author-created code, documentation and design material, are shared under **[Creative Commons Attribution–ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)**, unless otherwise indicated. See [LICENSE.md](LICENSE.md).
 
-GitHub Pages must be enabled in the repository settings with GitHub Actions selected as the source.
+You may copy, use, adapt and redistribute licensed material, including commercially, provided you give appropriate attribution, link to the licence, indicate changes and share adaptations under the same or a compatible licence. Third-party software, libraries, fonts and other dependencies retain their respective licences.
 
-## Project structure
+**Suggested attribution:**
 
-```text
-src/
-	components/
-	engine/
-	styles/
-public/
-legacy-static/
-```
+> Graham Newman / Muno Mono, *Graphic Design Gestalt Engine* (2026), https://github.com/MunoMono/graphic_design_gestalt_engine, licensed under CC BY-SA 4.0. Changes indicated where applicable.
 
-## Research / design context
-
-This engine was developed by Graham Newman as part of RCA PhD work and RCA Research Biennale 2027 identity exploration.
-
-This is not a historical style-copying tool. It does not reproduce Wolfgang Weingart, Emil Ruder, April Greiman, Otl Aicher, Paul Rand, or any specific designer’s work. It uses shared graphic design principles — line, shape, texture, typography, balance, rhythm, emphasis, movement, pattern, proportion — as generative inputs.
-
-## Status
-
-Prototype / research tool.
+Artwork that you generate using the engine is **not automatically placed under CC BY-SA 4.0 merely because the engine was used**. Rights in a particular output depend on what that output contains and the applicable law.
 
 ## Author
 
-Graham Newman  
-RCA PhD  
-MRes RCA PGCHE FRSA
+**Graham Newman / Muno Mono**  
+Doctoral researcher, Royal College of Art  
+[GitHub: @MunoMono](https://github.com/MunoMono)
 
-## License
-
-License: to be confirmed.
-
-## Colour Presets
-
-The Colour select replaces the old Colour element. `Mono` keeps the original monochrome inks; six mood-board presets recolour every element, process ink, and chromatic offset: California New Wave, Graphic Punk, Corporate Funk, Acid House, Nakameguro, and Total Total. Hue shift (-180 to 180), saturation (0 to 200%), and brightness (-100 to 100) sliders riff on the active preset. Inks too close to the background are dropped automatically. The background stays independent. Sandbox JSON stores `colourPreset`, `colourHue`, `colourSaturation`, and `colourBrightness`; non-default colour settings appear in export filenames.
+*Make something. Change the rules. See what happens.*
