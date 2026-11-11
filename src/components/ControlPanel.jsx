@@ -38,20 +38,18 @@ export default function ControlPanel({
       </div>
 
       <div className="panel-stack">
-        <div className="panel-note-block panel-note-block--actions">
-          <p className="panel-note">Start with a blank canvas, add visual language parts deliberately, and adjust only the studies you have activated.</p>
-          <Button kind="secondary" onClick={onClearCanvas} disabled={disabled}>
-            Clear canvas
-          </Button>
+        <SeedControls value={seedInput} onChange={onSeedInputChange} onLoad={onLoadSeed} onRegenerate={onRegenerateSeed} onGenerateBatch={onGenerateBatch} disabled={disabled} />
+
+        <div className="panel-note-block">
+          <p className="panel-note">Start with a new seed or a blank canvas, add visual language parts deliberately, and adjust only the studies you have activated.</p>
         </div>
 
         <Accordion align="start" className="gestalt-accordion gestalt-accordion--root">
-          <AccordionItem title="Elements" open>
+          <AccordionItem title="Elements">
             <div className="accordion-group">
               <p className="panel-eyebrow">Add visual building blocks</p>
               <ElementsAccordion
                 values={state.gestaltControls.elements}
-                selectedKey={state.element}
                 colourState={state}
                 disabled={disabled}
                 onBackgroundChange={onBackgroundChange}
@@ -67,7 +65,6 @@ export default function ControlPanel({
               <p className="panel-eyebrow">Modify how active elements organise themselves</p>
               <PrinciplesAccordion
                 values={state.gestaltControls.principles}
-                selectedKey={state.principle}
                 disabled={disabled}
                 onToggleChange={(key, active) => onPrincipleControlChange(key, { active })}
                 onControlChange={onPrincipleControlChange}
@@ -109,14 +106,6 @@ export default function ControlPanel({
                 onChange={({ value }) => onProcessScaleChange(Number(value))}
               />
 
-              <SeedControls value={seedInput} onChange={onSeedInputChange} onLoad={onLoadSeed} onRegenerate={onRegenerateSeed} disabled={disabled} />
-
-              <div className="panel-actions">
-                <Button kind="secondary" onClick={onGenerateBatch} disabled={disabled}>
-                  Generate batch
-                </Button>
-              </div>
-
               <div className="panel-stack panel-stack--tight panel-section">
                 <div className="panel-heading panel-heading--compact">
                   <p className="panel-eyebrow">Engine controls</p>
@@ -138,6 +127,12 @@ export default function ControlPanel({
             </div>
           </AccordionItem>
         </Accordion>
+
+        <div className="panel-actions panel-actions--split">
+          <Button kind="secondary" size="lg" onClick={onClearCanvas} disabled={disabled}>
+            Clear canvas
+          </Button>
+        </div>
       </div>
     </Tile>
   );

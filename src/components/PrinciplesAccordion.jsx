@@ -2,14 +2,14 @@ import { Accordion, AccordionItem, Select, SelectItem, Tag, Toggle } from "@carb
 import { GESTALT_CONTROL_SECTIONS } from "../engine/constants";
 import GestaltSliderGroup from "./GestaltSliderGroup";
 
-export default function PrinciplesAccordion({ values, selectedKey, onControlChange, onToggleChange, disabled }) {
+export default function PrinciplesAccordion({ values, onControlChange, onToggleChange, disabled }) {
   return (
     <Accordion align="start" className="gestalt-accordion gestalt-accordion--nested">
       {GESTALT_CONTROL_SECTIONS.principles.map((item) => {
         const itemValues = values[item.key];
 
         return (
-          <AccordionItem key={item.key} title={item.title} open={itemValues.active || item.key === selectedKey}>
+          <AccordionItem key={item.key} title={item.title}>
             <div className="accordion-item__content">
               <p className="panel-note">{item.description}</p>
               <div className="accordion-item__controls">

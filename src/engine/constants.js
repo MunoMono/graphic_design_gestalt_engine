@@ -6,7 +6,6 @@ export const ELEMENT_OPTIONS = [
   { value: "colour", label: "Colour" },
   { value: "texture", label: "Texture" },
   { value: "value", label: "Value" },
-  { value: "typography", label: "Typography" },
 ];
 
 export const PRINCIPLE_OPTIONS = [
@@ -120,19 +119,13 @@ export const GESTALT_CONTROL_SECTIONS = {
         { value: "actual", label: "Actual" },
       ],
       description:
-        "Texture is a quality related closely to our sense of touch. It can create emphasis, movement, pattern, and emotion. Implied texture appears to be present but is an illusion. Actual texture really exists and can be felt.",
+        "Texture is a quality related closely to our sense of touch. It can create emphasis, movement, pattern, and emotion. Implied texture suggests a surface; actual texture is tactile. On screen, both modes are visual simulations.",
     },
     {
       key: "value",
       title: "Value",
       description:
         "Value describes shadows from lightness to darkness. Value variation gives a sense of space and depth to an object, emphasising its three-dimensionality. Strong contrast in value can create emphasis.",
-    },
-    {
-      key: "typography",
-      title: "Typography",
-      description:
-        "Typography controls how users see, read, and understand text. It includes scale, spacing, hierarchy, contrast, alignment, rhythm, and proximity.",
     },
   ],
   principles: [
@@ -242,7 +235,9 @@ export function getActiveGestaltItems(gestaltControls, section) {
 }
 
 export function getActiveRenderableElementItems(gestaltControls) {
-  return getActiveGestaltItems(gestaltControls, "elements").filter((item) => item.key !== "colour");
+  const active = getActiveGestaltItems(gestaltControls, "elements");
+  const materials = active.filter((item) => item.key !== "colour");
+  return materials.length > 0 ? materials : active;
 }
 
 export const DEFAULT_MACHINE_STATE = {

@@ -12,7 +12,7 @@ The canvas may scale to fit your screen, but exports still render at the active 
 
 ## What the Controls Mean
 
-- `Element` is the material the composition is built from: line, space, shape, form, colour, texture, value, or typography.
+- `Element` is the material the composition is built from: line, space, shape, form, colour, texture, or value.
 - `Principle` is the organising behaviour: balance, rhythm, emphasis, pattern, and so on.
 - `Chaos` controls how ordered or disrupted the result feels.
 - `Proof` switches the backdrop between `White` and `Black` review grounds.

@@ -106,9 +106,11 @@ export default function ExportPanel({
           {state.process !== "clean" ? <Tag type="purple">I {state.processIntensity} / S {state.processScale}</Tag> : null}
         </div>
 
-        <Button kind="primary" onClick={onExport} disabled={disabled}>
-          Export PNG
-        </Button>
+        <div className="panel-actions panel-actions--split">
+          <Button kind="primary" size="lg" onClick={onExport} disabled={disabled}>
+            Export PNG
+          </Button>
+        </div>
       </div>
     </Tile>
   );

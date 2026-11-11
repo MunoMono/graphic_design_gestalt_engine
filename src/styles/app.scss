@@ -19,6 +19,7 @@ body {
 }
 
 .app-shell {
+  --action-button-width: 10.5rem;
   min-height: 100vh;
   background: var(--cds-background);
   color: var(--cds-text-primary);
@@ -159,11 +160,6 @@ body {
   background: var(--cds-layer-02);
 }
 
-.panel-note-block--actions {
-  display: grid;
-  gap: 0.85rem;
-}
-
 .panel-stack {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -191,6 +187,7 @@ body {
 
 .panel-actions--split {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-inline-size: calc(2 * var(--action-button-width) + 0.75rem);
 }
 
 .panel-actions--split > * {
@@ -470,7 +467,6 @@ body {
 }
 
 .app-panel .cds--btn {
-  min-block-size: 3rem;
   white-space: nowrap;
 }
 
@@ -612,6 +608,10 @@ body {
 }
 
 @media (max-width: 1240px) {
+  .app-shell {
+    --action-button-width: 9.5rem;
+  }
+
   .app-shell__grid {
     grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
   }

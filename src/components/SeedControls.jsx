@@ -1,6 +1,6 @@
 import { Button, TextInput } from "@carbon/react";
 
-export default function SeedControls({ value, onChange, onLoad, onRegenerate, disabled }) {
+export default function SeedControls({ value, onChange, onLoad, onRegenerate, onGenerateBatch, disabled }) {
   return (
     <div className="panel-stack panel-stack--tight">
       <TextInput
@@ -11,11 +11,14 @@ export default function SeedControls({ value, onChange, onLoad, onRegenerate, di
         placeholder="Paste seed"
       />
       <div className="panel-actions panel-actions--split">
-        <Button kind="secondary" onClick={onLoad} disabled={disabled}>
+        <Button kind="primary" size="lg" onClick={onRegenerate} disabled={disabled}>
+          New seed
+        </Button>
+        <Button kind="secondary" size="lg" onClick={onLoad} disabled={disabled}>
           Load seed
         </Button>
-        <Button kind="ghost" onClick={onRegenerate} disabled={disabled}>
-          New seed
+        <Button kind="secondary" size="lg" onClick={onGenerateBatch} disabled={disabled}>
+          Generate batch
         </Button>
       </div>
     </div>

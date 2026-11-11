@@ -222,6 +222,7 @@ export default function App() {
   }
 
   async function handleChaosChange(value) {
+    if (value === engineState.chaos) return;
     setBatchCandidates([]);
     await applyState({ chaos: value });
   }
@@ -232,6 +233,7 @@ export default function App() {
   }
 
   async function handleColourChange(patch) {
+    if (Object.entries(patch).every(([key, value]) => engineState[key] === value)) return;
     setBatchCandidates([]);
     await applyState(patch);
   }
@@ -242,21 +244,25 @@ export default function App() {
   }
 
   async function handleProcessIntensityChange(value) {
+    if (value === engineState.processIntensity) return;
     setBatchCandidates([]);
     await applyState({ processIntensity: value });
   }
 
   async function handleProcessScaleChange(value) {
+    if (value === engineState.processScale) return;
     setBatchCandidates([]);
     await applyState({ processScale: value });
   }
 
   async function handleHierarchyChange(patch) {
+    if (Object.entries(patch).every(([key, value]) => engineState[key] === value)) return;
     setBatchCandidates([]);
     await applyState(patch);
   }
 
   async function handleGestaltControlChange(section, key, patch) {
+    if (Object.entries(patch).every(([name, value]) => engineState.gestaltControls[section][key][name] === value)) return;
     setBatchCandidates([]);
     await applyState((currentState) => ({
       ...currentState,
@@ -330,12 +336,7 @@ export default function App() {
     setError("");
 
     try {
-      setEngineState((currentState) => engineRef.current.loadSeed(candidate.seed, {
-        ...currentState,
-        element: candidate.element,
-        principle: candidate.principle,
-        gestaltControls: candidate.gestaltControls,
-      }));
+      setEngineState(engineRef.current.loadSeed(candidate.seed, candidate.state));
       document.querySelector(".app-panel--canvas, canvas")?.scrollIntoView({ behavior: "smooth", block: "center" });
     } catch (nextError) {
       setError(nextError.message);

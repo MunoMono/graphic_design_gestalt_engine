@@ -28,11 +28,12 @@ The available visual materials are:
 - `Space`
 - `Shape`
 - `Form`
+- `Colour`
 - `Texture`
 - `Value`
-- `Typography`
 
 Each element should feel like a family of graphic matter rather than a locked composition template.
+Colour can be used alone or to modify other active elements. Texture modes are visual simulations on screen; they cannot create a physically tactile surface.
 
 ## Principles
 
@@ -49,6 +50,7 @@ The available organising behaviours are:
 - `Proportion`
 
 Principles should change how the element is composed, not merely decorate it.
+Each active principle contributes its own layer. Balance and Rhythm modes apply across the elements; symmetric Balance mirrors the composition when used on its own. Process treatments can subsequently change that symmetry.
 
 ## Chaos
 
@@ -77,6 +79,7 @@ The seed remains the canonical recall mechanism.
 - use positive integer seeds only
 - keep `randomSeed(...)` and `noiseSeed(...)` aligned to the same seed
 - changing `Element`, `Principle`, `Chaos`, `Proof`, `Process`, or `Colour` should redraw the same seed, not replace it
+- renderer changes can alter the appearance of an older saved seed and settings
 
 ## Formats
 

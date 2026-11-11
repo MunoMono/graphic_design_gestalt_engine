@@ -4,15 +4,15 @@ import { GESTALT_CONTROL_SECTIONS } from "../engine/constants";
 import BackgroundPicker from "./BackgroundPicker";
 import GestaltSliderGroup from "./GestaltSliderGroup";
 
-export default function ElementsAccordion({ values, selectedKey, onControlChange, onToggleChange, colourState, onColourChange, onBackgroundChange, disabled }) {
+export default function ElementsAccordion({ values, onControlChange, onToggleChange, colourState, onColourChange, onBackgroundChange, disabled }) {
   return (
     <Accordion align="start" className="gestalt-accordion gestalt-accordion--nested">
       {GESTALT_CONTROL_SECTIONS.elements.map((item) => {
         const itemValues = values[item.key];
-        const colourControlsDisabled = disabled || !itemValues.active || colourState.colourPreset === "mono";
+        const colourControlsDisabled = disabled || !itemValues.active;
 
         return (
-          <AccordionItem key={item.key} title={item.title} open={itemValues.active || item.key === selectedKey}>
+          <AccordionItem key={item.key} title={item.title}>
             <div className="accordion-item__content">
               <p className="panel-note">{item.description}</p>
               <div className="accordion-item__controls">
@@ -44,7 +44,7 @@ export default function ElementsAccordion({ values, selectedKey, onControlChange
 
               {item.key === "colour" ? (
                 <>
-                  <p className="panel-note">Choose a palette and adjust hue, saturation, and brightness for the active colour study.</p>
+                  <p className="panel-note">Choose a palette and adjust hue, saturation, and brightness. Colour also modifies any other active elements.</p>
                   <Select id="colour-select" labelText="Colour" value={colourState.colourPreset} disabled={disabled || !itemValues.active} onChange={(event) => onColourChange({ colourPreset: event.target.value })}>
                     {COLOUR_PRESET_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value} text={option.label} />
@@ -65,7 +65,7 @@ export default function ElementsAccordion({ values, selectedKey, onControlChange
                       step={1}
                       value={colourState[key]}
                       hideTextInput={false}
-                      disabled={colourControlsDisabled}
+                      disabled={colourControlsDisabled || (colourState.colourPreset === "mono" && key !== "colourBrightness")}
                       onChange={({ value }) => onColourChange({ [key]: Number(value) })}
                     />
                   ))}
