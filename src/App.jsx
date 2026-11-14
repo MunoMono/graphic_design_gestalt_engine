@@ -534,42 +534,44 @@ export default function App() {
       <AppHeader theme={theme} onToggleTheme={() => setTheme((currentTheme) => (currentTheme === "g100" ? "white" : "g100"))} />
       <main className="app-shell__content">
         <section className="app-shell__grid">
-          <div className="app-shell__left">
-            <ControlPanel
-              state={engineState}
-              seedInput={seedInput}
-              summaryLabel={matrixSummary}
-              onChaosChange={handleChaosChange}
-              onBackgroundChange={handleBackgroundChange}
-              onColourChange={handleColourChange}
-              onProcessChange={handleProcessChange}
-              onProcessIntensityChange={handleProcessIntensityChange}
-              onProcessScaleChange={handleProcessScaleChange}
-              onHierarchyChange={handleHierarchyChange}
-              onElementChange={handleElementChange}
-              onPrincipleChange={handlePrincipleChange}
-              onElementControlChange={(key, patch) => handleGestaltControlChange("elements", key, patch)}
-              onPrincipleControlChange={(key, patch) => handleGestaltControlChange("principles", key, patch)}
-              onSeedInputChange={setSeedInput}
-              onLoadSeed={handleLoadSeed}
-              onGenerateBatch={handleGenerateBatch}
-              onRegenerateSeed={handleRegenerateSeed}
-              onClearCanvas={handleClearCanvas}
-              disabled={!engineReady}
-            />
-          </div>
+          <div className="app-shell__editor">
+            <div className="app-shell__left">
+              <ControlPanel
+                state={engineState}
+                seedInput={seedInput}
+                summaryLabel={matrixSummary}
+                onChaosChange={handleChaosChange}
+                onBackgroundChange={handleBackgroundChange}
+                onColourChange={handleColourChange}
+                onProcessChange={handleProcessChange}
+                onProcessIntensityChange={handleProcessIntensityChange}
+                onProcessScaleChange={handleProcessScaleChange}
+                onHierarchyChange={handleHierarchyChange}
+                onElementChange={handleElementChange}
+                onPrincipleChange={handlePrincipleChange}
+                onElementControlChange={(key, patch) => handleGestaltControlChange("elements", key, patch)}
+                onPrincipleControlChange={(key, patch) => handleGestaltControlChange("principles", key, patch)}
+                onSeedInputChange={setSeedInput}
+                onLoadSeed={handleLoadSeed}
+                onGenerateBatch={handleGenerateBatch}
+                onRegenerateSeed={handleRegenerateSeed}
+                onClearCanvas={handleClearCanvas}
+                disabled={!engineReady}
+              />
+            </div>
 
-          <div className="app-shell__centre">
-            {error ? <InlineNotification kind="error" lowContrast hideCloseButton title="Engine error" subtitle={error} /> : null}
-            <CanvasStage
-              stageRef={stageRef}
-              state={engineState}
-              metrics={exportMetrics}
-              onFormatChange={handleFormatChange}
-              onCustomWidthChange={handleCustomWidthChange}
-              onCustomHeightChange={handleCustomHeightChange}
-              disabled={!engineReady}
-            />
+            <div className="app-shell__centre">
+              {error ? <InlineNotification className="app-shell__error" kind="error" lowContrast hideCloseButton title="Engine error" subtitle={error} /> : null}
+              <CanvasStage
+                stageRef={stageRef}
+                state={engineState}
+                metrics={exportMetrics}
+                onFormatChange={handleFormatChange}
+                onCustomWidthChange={handleCustomWidthChange}
+                onCustomHeightChange={handleCustomHeightChange}
+                disabled={!engineReady}
+              />
+            </div>
           </div>
 
           <div className="app-shell__right">
