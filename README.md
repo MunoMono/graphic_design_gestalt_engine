@@ -1,18 +1,20 @@
 # Graphic Design Gestalt Engine
 
-**A browser-based tool for exploring how graphic designs can be made from simple visual ingredients.**
+**A browser-based tool for exploring how the visual language of graphic design can be made from its principles and elements. Make something, change the rules, see what happens.**
 
 [**Open the engine ↗**](https://munomono.github.io/graphic_design_gestalt_engine/) · [**View the source code**](https://github.com/MunoMono/graphic_design_gestalt_engine)
 
 ## What is it?
 
-The Graphic Design Gestalt Engine makes images by mixing visual ingredients—such as lines, shapes, texture, and type—with ways of arranging them, such as balance, rhythm, and pattern. You choose the ingredients and how they behave, then the engine turns those choices into an image. You do not need design or technical experience to try it: change a control, see what happens, and keep exploring.
+The engine computationally explores and critically questions the elements and principles of graphic design gestalt. By systematically generating visual compositions, the tool allows anyone to investigate, challenge and reinterpret established conventions of visual language. You do not need any design or technical experience to try it: change a control, see what happens, and keep exploring.
 
-The tool opens on a blank canvas. It is an experiment rather than a collection of ready-made templates, so you build up an image by switching on the parts and relationships you want to explore.
+The engine uses rules to generate graphic compositions. By letting you switch design elements and principles on and off, and change how they work together, it helps you explore how those choices shape an image—and question whether familiar design rules always produce the results we expect. Here, **Elements** means the building blocks of an image, such as shape, line, texture and colour. **Principles** means ways those elements can be organised, such as balance, rhythm, movement and pattern.
 
 ## How to use it
 
-Start in **Elements** and switch on one or more building blocks, such as Shape, Line, or Texture. Each one can have its own settings; for example, you can choose whether shapes feel more geometric or organic. Open **Principles** to switch on ways for the parts to relate to one another. Balance, Rhythm, Movement, and Pattern are some of the choices. Try one at a time at first, then combine them to see how the image changes.
+The tool opens on a blank canvas. It is an experiment rather than a collection of ready-made templates, so you build up an image by switching on the parts and relationships you want to explore.
+
+Start in **Elements** and switch on one or more building blocks, such as Shape, Line or Texture. Each one can have its own settings; for example, you can choose whether shapes feel more geometric or organic. Open **Principles** to switch on ways for the parts to relate to one another. Balance, Rhythm, Movement, and Pattern are some of the choices. Try one at a time at first, then combine them to see how the image changes.
 
 The **Chaos** slider changes how orderly or unpredictable the result feels. Lower settings tend to look more controlled, while higher settings introduce more variation. The hierarchy controls offer another way to guide the image: they adjust what stands out, how things line up, and which parts feel grouped together.
 
@@ -20,7 +22,7 @@ For colour, switch on **Colour** in Elements. Choose a palette—such as Nakameg
 
 The canvas size menu above the image includes screen, square, portrait, poster, and banner sizes, as well as a custom size. The canvas is your live preview: keep changing settings and watch the design respond.
 
-When you see a result you might want to keep, note its **Seed** number at the top of Controls. A seed is a kind of recipe number: with the same settings and seed, you can bring back the same result. Use **New seed** to explore a different version, or enter a seed and choose **Load seed** to revisit one. **Generate batch** alongside the seed controls makes alternatives that keep your selected elements but vary their settings, principles, and process. If Colour is active, it varies the palette too. Select a thumbnail in **Batch review** to bring that version and all its settings onto the main canvas. To recall it later, save its settings as well as its seed using the sandbox.
+When you see a result you might want to keep, note its **Seed** number. A seed is a kind of recipe number: with the same settings and seed, you can bring back the same result. Use **New seed** to explore a different version, or enter a seed and choose **Load seed** to revisit one. **Generate batch** makes several alternatives using your current choices. Select a thumbnail in **Batch review** to bring that version onto the main canvas.
 
 When you are ready to save an image, use the **Export** panel and choose **Export PNG**. You can adjust the image size and print resolution there; the panel shows the final pixel dimensions and the approximate print size. Very large exports may take longer, so a lower resolution or scale can help if an export does not finish. The suggested filename records key settings, including the seed, which can help you find or recreate the image later.
 
@@ -28,37 +30,36 @@ There is no single correct way to use the engine. A useful approach is to change
 
 ## About the project
 
-The engine was developed by **Graham Newman / Muno Mono** through doctoral research at the **Royal College of Art**, and in exploring a generative visual language for the proposed RCA PhD Biennale 2027 identity. It invites people to try out familiar ideas about graphic design and see what happens when those ideas are combined or changed.
-
-This is an independent research and design project, not an official Royal College of Art software product or endorsed institutional identity.
+The engine was developed by **Graham Newman (Muno Mono)** through doctoral research at the **Royal College of Art**, and in exploring a generative visual language for the RCA Research Biennale 2027 identity. It invites people to try out familiar ideas about graphic design and see what happens when those ideas are combined or changed. This is an independent research and design project, not an official Royal College of Art software product or endorsed institutional identity.
 
 ## For developers
 
-The live application runs in a web browser and needs no installation or account. To run a copy on your computer, install Node.js and npm, then open a terminal in the project folder and run:
+The engine runs in a web browser. You don’t need to install anything or create an account to use it. To run a copy on your computer, install Node.js and npm. Then open a terminal in the project folder and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-To make and preview a production build, run `npm run build` followed by `npm run preview`.
+To make and preview a production build:
+
+```bash
+npm run build
+npm run preview
+```
 
 ## Licence and reuse
 
-**© 2026 Graham Newman / Muno Mono.** The original materials in this repository, including author-created code, documentation, and design material, are shared under **[Creative Commons Attribution–ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)**, unless otherwise indicated. See [LICENSE.md](LICENSE.md).
+**© 2026 Graham Newman / Muno Mono.**
 
-You may copy, use, adapt, and redistribute licensed material, including commercially, provided you give appropriate attribution, link to the licence, indicate changes, and share adaptations under the same or a compatible licence. Third-party software, libraries, fonts, and other dependencies retain their respective licences.
+Unless otherwise indicated, the original materials in this repository—including author-created code, documentation and design material—are shared under the [Creative Commons Attribution–ShareAlike 4.0 International licence (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/). See [LICENSE.md](LICENSE.md).
 
-**Suggested attribution:**
+You may copy, use, adapt and redistribute the licensed material, including for commercial purposes, provided you give appropriate attribution, link to the licence, indicate any changes, and share adaptations under the same or a compatible licence. Third-party software, libraries, fonts and other dependencies remain under their own licences.
 
-> Graham Newman / Muno Mono, *Graphic Design Gestalt Engine* (2026), https://github.com/MunoMono/graphic_design_gestalt_engine, licensed under CC BY-SA 4.0. Changes indicated where applicable.
+### Suggested attribution
 
-Images made with the engine are **not automatically placed under CC BY-SA 4.0 just because the engine was used**. Rights in a particular image depend on what it contains and the applicable law.
+> Graham Newman / Muno Mono, *Graphic Design Gestalt Engine* (2026), [source code](https://github.com/MunoMono/graphic_design_gestalt_engine), licensed under CC BY-SA 4.0. Changes indicated where applicable.
 
-## Author
+Images made with the engine are not automatically covered by CC BY-SA 4.0. The rights in each image depend on what it contains and the applicable law.
 
-**Graham Newman / Muno Mono**  
-Doctoral researcher, Royal College of Art  
-[GitHub: @MunoMono](https://github.com/MunoMono)
-
-*Make something. Change the rules. See what happens.*
+**Graham Newman, November 2026**
