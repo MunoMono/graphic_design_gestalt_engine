@@ -1708,6 +1708,15 @@ function buildCompositionSummary(state) {
   return `${elementLabel} × ${principleLabel} active`;
 }
 
+function getPreviewRenderKey(state) {
+  const {
+    format, scale, dpi, dpiMode, customDpi, customWidth, customHeight,
+    baseWidth, baseHeight, exportWidth, exportHeight,
+    ...previewState
+  } = state;
+  return JSON.stringify(previewState);
+}
+
 export function createGestaltEngine(containerElement, options = {}) {
   if (!containerElement) {
     throw new Error("A container element is required to mount the Gestalt engine.");
@@ -1724,9 +1733,9 @@ export function createGestaltEngine(containerElement, options = {}) {
 
   const sketch = (p) => {
     p.setup = () => {
+      p.pixelDensity(1);
       const canvas = p.createCanvas(currentState.width, currentState.height);
       canvas.parent(containerElement);
-      p.pixelDensity(2);
       p.noLoop();
       canvasElement = canvas.elt;
       readyResolver(currentState);
@@ -1746,20 +1755,22 @@ export function createGestaltEngine(containerElement, options = {}) {
     }
 
     if (sketchInstance.width !== nextState.width || sketchInstance.height !== nextState.height) {
-      sketchInstance.resizeCanvas(nextState.width, nextState.height);
-      sketchInstance.pixelDensity(2);
+      sketchInstance.resizeCanvas(nextState.width, nextState.height, true);
     }
   }
 
-  function updateGestaltEngine(nextState) {
-    currentState = normalizeState(nextState);
+  function updateGestaltEngine(nextState, forceRedraw = false) {
+    const normalizedState = normalizeState(nextState);
+    const needsRedraw = forceRedraw || getPreviewRenderKey(normalizedState) !== getPreviewRenderKey(currentState);
+    currentState = normalizedState;
+    if (!needsRedraw) return currentState;
     resizeIfNeeded(currentState);
     sketchInstance.redraw();
     return currentState;
   }
 
   function renderGestaltComposition(nextState = currentState) {
-    return updateGestaltEngine(nextState);
+    return updateGestaltEngine(nextState, true);
   }
 
   // Blank canvases would give 12 identical blanks, so each candidate gets a seeded element/principle mix.

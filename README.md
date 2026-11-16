@@ -22,6 +22,8 @@ For colour, switch on **Colour** in Elements. Choose a palette—such as Nakameg
 
 The canvas size menu above the image includes screen, square, portrait, poster, and banner sizes, as well as a custom size. The canvas is your live preview: keep changing settings and watch the design respond.
 
+The preview uses a lower pixel density to keep editing responsive; PNG exports are rendered separately at the selected export dimensions.
+
 When you see a result you might want to keep, note its **Seed** number. A seed is a kind of recipe number: with the same settings and seed, you can bring back the same result. Use **New seed** to explore a different version, or enter a seed and choose **Load seed** to revisit one. **Generate batch** makes several alternatives using your current choices. Select a thumbnail in **Batch review** to bring that version onto the main canvas.
 
 When you are ready to save an image, use the **Export** panel and choose **Export PNG**. You can adjust the image size and print resolution there; the panel shows the final pixel dimensions and the approximate print size. Very large exports may take longer, so a lower resolution or scale can help if an export does not finish. The suggested filename records key settings, including the seed, which can help you find or recreate the image later.
