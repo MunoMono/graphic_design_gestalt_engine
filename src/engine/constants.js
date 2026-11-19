@@ -272,5 +272,5 @@ export const DEFAULT_MACHINE_STATE = {
   gestaltControls: DEFAULT_GESTALT_CONTROLS,
 };
 
-export const PRODUCT_NAME = "Graham Newman RCA PhD graphic design gestalt engine";
+export const PRODUCT_NAME = "RCA PhD graphic design gestalt engine";
 export const PRODUCT_CONTEXT = "RCA Research Biennale 2027";

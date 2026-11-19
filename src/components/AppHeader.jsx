@@ -9,7 +9,7 @@ export default function AppHeader({ theme, onToggleTheme }) {
     <Header aria-label={PRODUCT_NAME} className="app-header-shell">
       <div className="app-header-shell__identity">
         <HeaderName href="#" className="app-header-shell__name">
-          <span className="app-header-shell__name-roman">Graham Newman RCA PhD</span>{" "}
+          <span className="app-header-shell__name-roman">RCA PhD</span>{" "}
           <span className="app-header-shell__name-bold">graphic design gestalt engine</span>
         </HeaderName>
       </div>
