@@ -1,4 +1,35 @@
+import { PROCESS_OPTIONS } from "./constants.js";
+import { COLOUR_PRESET_OPTIONS } from "./colourPresets.js";
+
 const VALUE_END = String.raw`(?:"|\d|true|false|null|\}|\])`;
+
+const SANDBOX_OPTIONS = {
+  process: PROCESS_OPTIONS,
+  colourPreset: COLOUR_PRESET_OPTIONS,
+};
+
+export function formatSandboxOptions(state) {
+  const formatted = { ...state };
+  for (const [key, options] of Object.entries(SANDBOX_OPTIONS)) {
+    if (Object.hasOwn(formatted, key)) {
+      formatted[key] = options.find((option) => option.value === formatted[key])?.label ?? formatted[key];
+    }
+  }
+  return formatted;
+}
+
+export function resolveSandboxOptions(state) {
+  const resolved = { ...state };
+  for (const [key, options] of Object.entries(SANDBOX_OPTIONS)) {
+    if (!Object.hasOwn(resolved, key)) continue;
+    const option = options.find(({ value, label }) => value === resolved[key] || label === resolved[key]);
+    if (!option) {
+      throw new Error(`Unknown ${key}: ${String(resolved[key])}. Choose one of: ${options.map(({ label }) => label).join(", ")}.`);
+    }
+    resolved[key] = option.value;
+  }
+  return resolved;
+}
 
 // Repairs common hand-editing slips: comments, missing/trailing commas, unquoted keys, single quotes.
 export function repairSandboxJson(source) {

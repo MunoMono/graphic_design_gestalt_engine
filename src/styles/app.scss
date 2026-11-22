@@ -458,12 +458,86 @@ body {
   gap: 0.85rem;
 }
 
+.sandbox-panel__code {
+  min-width: 0;
+  --sandbox-element: #78a9ff;
+  --sandbox-principle: #d4a0ff;
+  --sandbox-key: #82cfff;
+  --sandbox-value: #ffb784;
+  --sandbox-comment: #a8a8a8;
+}
+
+.sandbox-panel__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.sandbox-panel__code > .cds--form-item {
+  margin-bottom: 0.75rem;
+}
+
+.sandbox-panel__editor {
+  position: relative;
+  background: var(--cds-field-01);
+}
+
+.app-shell--white .sandbox-panel__code {
+  --sandbox-element: #0043ce;
+  --sandbox-principle: #6929c4;
+  --sandbox-key: #00539a;
+  --sandbox-value: #8a3800;
+  --sandbox-comment: #525252;
+}
+
+.sandbox-panel__highlight,
 .sandbox-panel__editor .cds--text-area {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.6875rem 1rem;
+  border: 0;
   min-height: 32rem;
-  font-family: var(--cds-code-01-font-family);
+  font-family: var(--cds-code-01-font-family, "IBM Plex Mono", monospace);
   font-size: 0.8125rem;
   line-height: 1.55;
   white-space: pre;
+  tab-size: 8;
+}
+
+.sandbox-panel__highlight {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: var(--cds-text-primary);
+  pointer-events: none;
+}
+
+.sandbox-panel__editor .cds--text-area {
+  position: relative;
+  background: transparent;
+  border-bottom: 1px solid var(--cds-border-strong-01);
+  color: transparent;
+  caret-color: var(--cds-text-primary);
+}
+
+.sandbox-panel__editor .cds--text-area::selection {
+  color: transparent;
+  background: rgba(15, 98, 254, 0.35);
+}
+
+.sandbox-token--element { color: var(--sandbox-element); }
+.sandbox-token--principle { color: var(--sandbox-principle); }
+.sandbox-token--key { color: var(--sandbox-key); }
+.sandbox-token--string { color: var(--sandbox-value); }
+.sandbox-token--value { color: var(--sandbox-value); }
+.sandbox-token--comment { color: var(--sandbox-comment); }
+
+@media (forced-colors: active) {
+  .sandbox-panel__highlight { display: none; }
+  .sandbox-panel__editor .cds--text-area { color: CanvasText; }
+  .sandbox-panel__editor .cds--text-area::selection { color: HighlightText; background: Highlight; }
 }
 
 .app-panel--sandbox {
@@ -760,6 +834,7 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .sandbox-panel__highlight,
   .sandbox-panel__editor .cds--text-area {
     min-height: 16rem;
   }

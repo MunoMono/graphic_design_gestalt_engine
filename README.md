@@ -28,6 +28,8 @@ When you see a result you might want to keep, note its **Seed** number. A seed i
 
 When you are ready to save an image, use the **Export** panel and choose **Export PNG**. You can adjust the image size and print resolution there; the panel shows the final pixel dimensions and the approximate print size. Very large exports may take longer, so a lower resolution or scale can help if an export does not finish. The suggested filename records key settings, including the seed, which can help you find or recreate the image later.
 
+The Sandbox lets you edit the composition's settings as text. Colours distinguish elements, principles, setting names, and values. Click an element's or principle's `active` value, or a setting with defined choices such as a line mode, process, or colour preset, to use the dropdown above the code. Valid JSON edits update the composition immediately; incomplete or invalid edits are kept without changing the last valid composition. **Apply code** confirms edits and can repair minor JSON mistakes. Process and colour presets appear by their toolbox names, and the text updates as you use the toolbox. While you are editing the text, toolbox-to-sandbox updates pause to protect your edits; choose **Apply code** or **Reset code** to resume them. Further sandbox edits can replace toolbox changes made during that pause. Imported code can use either toolbox names or the original machine-readable values.
+
 There is no single correct way to use the engine. A useful approach is to change one or two things at a time, compare the results, and save the versions you want to return to.
 
 ## About the project

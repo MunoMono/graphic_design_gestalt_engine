@@ -10,7 +10,7 @@ import { DEFAULT_MACHINE_STATE, PROCESS_OPTIONS, PRODUCT_NAME, createDefaultGest
 import { buildExportFilename } from "./engine/exportNaming";
 import { applyExportMetricsToState, getExportMetrics } from "./engine/exportSizing";
 import { createGestaltEngine, normalizeMachineState } from "./engine/gestaltEngine";
-import { parseSandboxCode } from "./engine/sandboxParse";
+import { formatSandboxOptions, parseSandboxCode, resolveSandboxOptions } from "./engine/sandboxParse";
 
 function isEditableTarget(target) {
   const tagName = target?.tagName;
@@ -47,7 +47,7 @@ function buildSandboxStateSnapshot(state) {
 }
 
 function serializeSandboxState(state) {
-  return JSON.stringify(buildSandboxStateSnapshot(state), null, 2);
+  return JSON.stringify(formatSandboxOptions(buildSandboxStateSnapshot(state)), null, 2);
 }
 
 function buildSandboxDownloadName(state) {
@@ -394,18 +394,33 @@ export default function App() {
 
   function handleSandboxCodeChange(value) {
     setSandboxDirty(true);
-    setSandboxStatus(null);
     setSandboxCode(value);
+
+    try {
+      const nextState = buildSandboxEngineState(JSON.parse(value));
+      setBatchCandidates([]);
+      setEngineState(nextState);
+      setSandboxStatus({
+        kind: "success",
+        title: "Changes live",
+        subtitle: "The composition has been updated.",
+      });
+    } catch (nextError) {
+      setSandboxStatus({
+        kind: "warning",
+        title: "Live update paused",
+        subtitle: `Your text is preserved; the last valid composition remains visible. ${nextError.message}`,
+      });
+    }
   }
 
-  function applySandboxSource(source, successStatus) {
-    const { value: parsedConfig, repaired } = parseSandboxCode(source);
-
-    if (!parsedConfig || typeof parsedConfig !== "object" || Array.isArray(parsedConfig)) {
+  function buildSandboxEngineState(parsedValue) {
+    if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
       throw new Error("Sandbox input must be a JSON object.");
     }
 
-    const nextState = hydrateMachineState({
+    const parsedConfig = resolveSandboxOptions(parsedValue);
+    return hydrateMachineState({
       ...engineState,
       ...parsedConfig,
       ...(parsedConfig.proof && parsedConfig.backgroundColor === undefined
@@ -413,6 +428,11 @@ export default function App() {
         : {}),
       gestaltControls: parsedConfig.gestaltControls ?? engineState.gestaltControls,
     });
+  }
+
+  function applySandboxSource(source, successStatus) {
+    const { value: parsedValue, repaired } = parseSandboxCode(source);
+    const nextState = buildSandboxEngineState(parsedValue);
 
     setBatchCandidates([]);
     setEngineState(nextState);
@@ -577,6 +597,7 @@ export default function App() {
           <div className="app-shell__right">
             <SandboxPanel
               code={sandboxCode}
+              dirty={sandboxDirty}
               status={sandboxStatus}
               onCodeChange={handleSandboxCodeChange}
               onApply={handleSandboxApply}
